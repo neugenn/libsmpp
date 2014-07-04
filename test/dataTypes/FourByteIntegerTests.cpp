@@ -3,6 +3,7 @@
 
 #include <cppunit/extensions/HelperMacros.h>
 #include "Integer.h"
+#include "IntegerPrivate.h"
 
 class FourByteIntegerTests : public CppUnit::TestFixture
 {
@@ -41,7 +42,7 @@ class FourByteIntegerTests : public CppUnit::TestFixture
     static const unsigned char DataBuffer[5];
 };
 
-const unsigned char FourByteIntegerTests::DataBuffer[5] = { 0x00, 0x00, 0x00 , 0x20, 0x05};
+const unsigned char FourByteIntegerTests::DataBuffer[5] = { 0x00, 0x00, 0x00 , 0x20, 0x05 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(FourByteIntegerTests);
 

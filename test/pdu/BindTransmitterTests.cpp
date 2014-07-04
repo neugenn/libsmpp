@@ -45,8 +45,8 @@ class BindTransmitterTests : public CppUnit::TestFixture
     CPPUNIT_TEST(testCreateWithInvalidCommandId);
     CPPUNIT_TEST(testCommandId);
     CPPUNIT_TEST(testCommandIdFromValidData);
-    CPPUNIT_TEST(testCopyConstructionNoCrash);
-    CPPUNIT_TEST(testAssignmentNoCrash);
+    CPPUNIT_TEST(testCopyConstruction);
+    CPPUNIT_TEST(testAssignment);
     CPPUNIT_TEST_SUITE_END();
 
 	public:
@@ -65,8 +65,8 @@ class BindTransmitterTests : public CppUnit::TestFixture
     void testCreateWithInvalidCommandId();
     void testCreateWithShortCommandLen();
     void testCreateWithLongCommandLen();
-    void testCopyConstructionNoCrash();
-    void testAssignmentNoCrash();
+    void testCopyConstruction();
+    void testAssignment();
 
     private:
     SMPP::BindTransmitter* pPdu_;
@@ -199,7 +199,8 @@ void BindTransmitterTests::testCreateWithShortCommandLen()
         0x01, 0x00 // address_range
         };
 
-    CPPUNIT_ASSERT_THROW(new SMPP::BindTransmitter(&InvalidShortCommandLenData[0], sizeof(InvalidShortCommandLenData)), std::invalid_argument);
+    SMPP::BindTransmitter t(&InvalidShortCommandLenData[0], sizeof(InvalidShortCommandLenData));
+    CPPUNIT_ASSERT_EQUAL(false, t.IsValid());
 }
 
 void BindTransmitterTests::testCreateWithLongCommandLen()
@@ -222,28 +223,19 @@ void BindTransmitterTests::testCreateWithLongCommandLen()
     CPPUNIT_ASSERT_THROW(new SMPP::BindTransmitter(&InvalidLongCommandLenData[0], sizeof(InvalidLongCommandLenData)), std::invalid_argument);
 }
 
-void BindTransmitterTests::testCopyConstructionNoCrash()
+void BindTransmitterTests::testCopyConstruction()
 {
-    {
-        SMPP::BindTransmitter t1;
-        SMPP::BindTransmitter t2(t1);
-
-        t1.CommandId();
-        t2.CommandId();
-    }
-    CPPUNIT_ASSERT(true);
+    SMPP::BindTransmitter t1(*pPdu_);
+    SMPP::BindTransmitter t2(t1);
+    CPPUNIT_ASSERT_EQUAL(t1, t2);
 }
 
-void BindTransmitterTests::testAssignmentNoCrash()
+void BindTransmitterTests::testAssignment()
 {
-    {
-        SMPP::BindTransmitter t1;
-        SMPP::BindTransmitter t2;
-        t2 = t1;
+    SMPP::BindTransmitter t1(*pPdu_);
+    SMPP::BindTransmitter t2;
+    t2 = t1;
 
-        t1.CommandId();
-        t2.CommandId();
-    }
-    CPPUNIT_ASSERT(true);
+    CPPUNIT_ASSERT_EQUAL(t1, t2);
 }
 #endif // BINDTRANSMITTERTESTS_H_

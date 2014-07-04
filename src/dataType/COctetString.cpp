@@ -33,21 +33,6 @@ namespace SMPP
         }
 
         data += (data_.size() + 1);
-
-        /*
-        if (!validator_.IsValid(this->Data(), this->Size()))
-        {
-            std::stringstream ss;
-            ss << __PRETTY_FUNCTION__ << " " << this->Name();
-            ss << " : Invalid ASCII data ! (";
-            for (size_t i = 0; i < data_.size(); ++i)
-            {
-                ss << std::setfill('0') << std::setw(2) << std::uppercase << std::hex << static_cast<int>(data_[i]);
-            }
-            ss << ") len: " << data_.size();
-            throw std::invalid_argument(ss.str());
-        }
-        */
     }
 
     template <typename T>

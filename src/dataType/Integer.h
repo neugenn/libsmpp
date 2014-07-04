@@ -68,16 +68,6 @@ namespace SMPP
      * @brief OneByteInteger Unsigned value containing 1 octet
      */
     typedef Integer<unsigned char> OneByteInteger;
-
-    /*!
-     * @brief OneByteInteger Unsigned value containing 2 octets
-     */
-    typedef Integer<uint16_t> TwoByteInteger;
-
-    /*!
-     * @brief OneByteInteger Unsigned value containing 4 octets
-     */
-    typedef Integer<uint32_t> FourByteInteger;
 }
 
 #endif // INTEGER_H_

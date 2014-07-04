@@ -1,4 +1,7 @@
 #include "BindTransmitter.h"
+#include "Integer.h"
+#include "COctetString.h"
+#include "PduHeader.h"
 
 namespace SMPP
 {
@@ -7,85 +10,150 @@ namespace SMPP
     const size_t BindTransmitter::SystemTypeMaxLen = 13; //bytes
     const size_t BindTransmitter::AddressRangeMaxLen = 41; //bytes
 
-    static const size_t MIN_SIZE = PduHeader::HeaderSize + 4 * CString().Size() + 3 * OneByteInteger().Size();
-    static const size_t MAX_SIZE = PduHeader::HeaderSize + BindTransmitter::SystemIdMaxLen + BindTransmitter::PasswordMaxLen + \
+    class BindTransmitter::BindTransmitterPrivate
+    {
+    public:
+        BindTransmitterPrivate() :
+        systemId_("system_id"),
+        password_("password"),
+        systemType_("system_type"),
+        interfaceVersion_("interface_version"),
+        addrTon_("addr_ton"),
+        addrNpi_("addr_npi"),
+        addressRange_("address_range"),
+        data_(new unsigned char[MaxSize()])
+        {}
+
+        BindTransmitterPrivate(const unsigned char* data) :
+        systemId_("system_id"),
+        password_("password"),
+        systemType_("system_type"),
+        interfaceVersion_("interface_version"),
+        addrTon_("addr_ton"),
+        addrNpi_("addr_npi"),
+        addressRange_("address_range"),
+        data_(new unsigned char[MaxSize()])
+        {
+            systemId_ = CString(data, SystemIdMaxLen, "system_id");
+            password_ = CString(data, PasswordMaxLen, "password");
+            systemType_ = CString(data, SystemTypeMaxLen, "system_type");
+            interfaceVersion_ = OneByteInteger(data, "interface_version");
+            addrTon_ = OneByteInteger(data, "addr_ton");
+            addrNpi_ = OneByteInteger(data, "addr_npi");
+            addressRange_ = CString(data, AddressRangeMaxLen, "address_range");
+        }
+
+        BindTransmitterPrivate(const BindTransmitterPrivate& rsh) :
+        systemId_(rsh.systemId_),
+        password_(rsh.password_),
+        systemType_(rsh.systemType_),
+        interfaceVersion_(rsh.interfaceVersion_),
+        addrTon_(rsh.addrTon_),
+        addrNpi_(rsh.addrNpi_),
+        addressRange_(rsh.addressRange_),
+        data_(new unsigned char[MaxSize()])
+        {}
+
+        BindTransmitterPrivate& operator=(const BindTransmitterPrivate& rsh)
+        {
+            if (this != &rsh)
+            {
+                systemId_ = rsh.systemId_;
+                password_ = rsh.password_;
+                systemType_ = rsh.systemType_;
+                interfaceVersion_ = rsh.interfaceVersion_;
+                addrTon_ = rsh.addrTon_;
+                addrNpi_ = rsh.addrNpi_;
+                addressRange_ = rsh.addressRange_;
+                memcpy(data_, rsh.data_, MaxSize());
+            }
+
+            return *this;
+        }
+
+        ~BindTransmitterPrivate()
+        {
+            if (NULL != data_)
+            {
+                delete [] data_;
+            }
+        }
+
+        static size_t MinSize()
+        {
+            return PduHeader::HeaderSize + 4 * CString().Size() + 3 * OneByteInteger().Size();
+        }
+
+        static size_t MaxSize()
+        {
+            return PduHeader::HeaderSize + BindTransmitter::SystemIdMaxLen + BindTransmitter::PasswordMaxLen + \
             BindTransmitter::SystemTypeMaxLen + BindTransmitter::AddressRangeMaxLen + 3 * OneByteInteger().Size();
+        }
+
+        size_t Size() const
+        {
+                return systemId_.Size() + password_.Size() + systemType_.Size() \
+                + interfaceVersion_.Size() + addrTon_.Size() + addrNpi_.Size() + addressRange_.Size();
+        }
+
+        unsigned char* Data()
+        {
+            bzero(data_, this->MaxSize());
+            return data_;
+        }
+
+        CString systemId_;
+        CString password_;
+        CString systemType_;
+        OneByteInteger interfaceVersion_;
+        OneByteInteger addrTon_;
+        OneByteInteger addrNpi_;
+        CString addressRange_;
+        unsigned char* data_;
+    };
+
 
     BindTransmitter::BindTransmitter() :
     Pdu(),
-    systemId_("system_id"),
-    password_("password"),
-    systemType_("system_type"),
-    interfaceVersion_("interface_version"),
-    addrTon_("addr_ton"),
-    addrNpi_("addr_npi"),
-    addressRange_("address_range"),
-    data_(NULL)
+    impl_(new BindTransmitterPrivate())
     {
-        header_.SetCommandId(SMPP::BIND_TRANSMITTER);
-        header_.SetCommandLength(MIN_SIZE);
+        header_->SetCommandId(SMPP::BIND_TRANSMITTER);
+        header_->SetCommandLength(BindTransmitterPrivate::MinSize());
     }
 
     BindTransmitter::BindTransmitter(const unsigned char* data, size_t len) :
     Pdu(data),
-    systemId_("system_id"),
-    password_("password"),
-    systemType_("system_type"),
-    interfaceVersion_("interface_version"),
-    addrTon_("addr_ton"),
-    addrNpi_("addr_npi"),
-    addressRange_("address_range"),
-    data_(NULL)
+    impl_(NULL)
     {
-        if (len < MIN_SIZE)
+        if (len < BindTransmitterPrivate::MinSize())
         {
             std::stringstream s;
             s << __PRETTY_FUNCTION__ << " : The size of the data buffer(" << len << ") ";
-            s << "is smaller than the minimum allowed PDU size(" << MIN_SIZE <<") !";
+            s << "is smaller than the minimum allowed PDU size(" << BindTransmitterPrivate::MinSize() <<") !";
             throw std::invalid_argument(s.str());
         }
 
-        systemId_ = CString(data, SystemIdMaxLen, "system_id");
-        password_ = CString(data, PasswordMaxLen, "password");
-        systemType_ = CString(data, SystemTypeMaxLen, "system_type");
-        interfaceVersion_ = OneByteInteger(data, "interface_version");
-        addrTon_ = OneByteInteger(data, "addr_ton");
-        addrNpi_ = OneByteInteger(data, "addr_npi");
-        addressRange_ = CString(data, AddressRangeMaxLen, "address_range");
+        impl_ = new BindTransmitterPrivate(data);
     }
 
     BindTransmitter::~BindTransmitter()
     {
-        if (NULL != data_)
+        if (NULL != impl_)
         {
-            delete [] data_;
+            delete impl_;
         }
     }
 
     BindTransmitter::BindTransmitter(const PduHeader& rsh) : Pdu(),
-    systemId_("system_id"),
-    password_("password"),
-    systemType_("system_type"),
-    interfaceVersion_("interface_version"),
-    addrTon_("addr_ton"),
-    addrNpi_("addr_npi"),
-    addressRange_("address_range"),
-    data_(NULL)
+    impl_(new BindTransmitterPrivate)
     {
         this->SetHeader(rsh);
-        header_.SetCommandLength(MIN_SIZE);
+        header_->SetCommandLength(BindTransmitterPrivate::MinSize());
     }
 
     BindTransmitter::BindTransmitter(const BindTransmitter &rsh) :
     Pdu(rsh),
-    systemId_(rsh.systemId_),
-    password_ (rsh.password_),
-    systemType_ (rsh.systemType_),
-    interfaceVersion_(rsh.interfaceVersion_),
-    addrTon_(rsh.addrTon_),
-    addrNpi_(rsh.addrNpi_),
-    addressRange_(rsh.addressRange_),
-    data_(NULL)
+    impl_(new BindTransmitterPrivate(*(rsh.impl_)))
     {
     }
 
@@ -97,15 +165,7 @@ namespace SMPP
         }
 
         Pdu::operator=(rsh);
-        systemId_ = rsh.systemId_;
-        password_ = rsh.password_;
-        systemType_ = rsh.systemType_;
-        interfaceVersion_ = rsh.interfaceVersion_;
-        addrTon_ = rsh.addrTon_;
-        addrNpi_ = rsh.addrNpi_;
-        addressRange_ = rsh.addressRange_;
-        data_ = NULL;
-
+        *impl_ = *(rsh.impl_);
         return *this;
     }
 
@@ -116,82 +176,76 @@ namespace SMPP
 
         std::stringstream str;
         str << s;
-        str << "system_id: " << systemId_ << " (" << systemId_.Value() << ")" << std::endl;
-        str << "password: " << password_ << " (" << password_.Value() << ")" << std::endl;
-        str << "system_type: " << systemType_ << " (" << systemType_.Value() << ")" << std::endl;
-        str << "interface_version: " << interfaceVersion_ << std::endl;
-        str << "addr_ton: " << addrTon_ << std::endl;
-        str << "addr_npi: " << addrNpi_ << std::endl;
-        str << "address_range: " << addressRange_;
+        str << "system_id: " << impl_->systemId_ << " (" << impl_->systemId_.Value() << ")" << std::endl;
+        str << "password: " << impl_->password_ << " (" << impl_->password_.Value() << ")" << std::endl;
+        str << "system_type: " << impl_->systemType_ << " (" << impl_->systemType_.Value() << ")" << std::endl;
+        str << "interface_version: " << impl_->interfaceVersion_ << std::endl;
+        str << "addr_ton: " << impl_->addrTon_ << std::endl;
+        str << "addr_npi: " << impl_->addrNpi_ << std::endl;
+        str << "address_range: " << impl_->addressRange_;
 
         s = str.str();
     }
 
     size_t BindTransmitter::MinSize() const
     {
-        return MIN_SIZE;
+        return BindTransmitterPrivate::MinSize();
     }
 
     size_t BindTransmitter::MaxSize() const
     {
-        return MAX_SIZE;
+        return BindTransmitterPrivate::MaxSize();
     }
 
     unsigned const char* BindTransmitter::Data() const
     {
-        const size_t size = this->Size();
-        if (NULL != data_)
-        {
-            delete [] data_;
-        }
+        unsigned char* buf = impl_->Data();
 
-        unsigned char* buf = new unsigned char[size];
+        memcpy(buf, header_->Data(), header_->Size());
+        size_t offset = header_->Size();
 
-        memcpy(buf, header_.Data(), header_.Size());
-        size_t offset = header_.Size();
+        memcpy(buf + offset, impl_->systemId_.Data(), impl_->systemId_.Size());
+        offset += impl_->systemId_.Size();
 
-        memcpy(buf + offset, systemId_.Data(), systemId_.Size());
-        offset += systemId_.Size();
+        memcpy(buf + offset, impl_->password_.Data(), impl_->password_.Size());
+        offset += impl_->password_.Size();
 
-        memcpy(buf + offset, password_.Data(), password_.Size());
-        offset += password_.Size();
+        memcpy(buf + offset, impl_->systemType_.Data(), impl_->systemType_.Size());
+        offset += impl_->systemType_.Size();
 
-        memcpy(buf + offset, systemType_.Data(), systemType_.Size());
-        offset += systemType_.Size();
+        memcpy(buf + offset, impl_->interfaceVersion_.Data(), impl_->interfaceVersion_.Size());
+        offset += impl_->interfaceVersion_.Size();
 
-        memcpy(buf + offset, interfaceVersion_.Data(), interfaceVersion_.Size());
-        offset += interfaceVersion_.Size();
+        memcpy(buf + offset, impl_->addrTon_.Data(), impl_->addrTon_.Size());
+        offset += impl_->addrTon_.Size();
 
-        memcpy(buf + offset, addrTon_.Data(), addrTon_.Size());
-        offset += addrTon_.Size();
+        memcpy(buf + offset, impl_->addrNpi_.Data(), impl_->addrNpi_.Size());
+        offset += impl_->addrNpi_.Size();
 
-        memcpy(buf + offset, addrNpi_.Data(), addrNpi_.Size());
-        offset += addrNpi_.Size();
+        memcpy(buf + offset, impl_->addressRange_.Data(), impl_->addressRange_.Size());
 
-        memcpy(buf + offset, addressRange_.Data(), addressRange_.Size());
-        offset += addressRange_.Size();
-
-        data_ = buf;
-        return data_;
+        return buf;
     }
 
     size_t BindTransmitter::Size() const
     {
-        const size_t size = header_.Size() + systemId_.Size() + password_.Size() + systemType_.Size() \
-                + interfaceVersion_.Size() + addrTon_.Size() + addrNpi_.Size() + addressRange_.Size();
-
-        return size;
+        return header_->Size() + impl_->Size();
     }
 
-    void BindTransmitter::GetBodyElements(std::vector<const PduDataType *> &elements) const
+    void BindTransmitter::GetBody(std::vector<const PduDataType *> &elements) const
     {
         elements.clear();
-        elements.push_back(&systemId_);
-        elements.push_back(&password_);
-        elements.push_back(&systemType_);
-        elements.push_back(&interfaceVersion_);
-        elements.push_back(&addrTon_);
-        elements.push_back(&addrNpi_);
-        elements.push_back(&addressRange_);
+        elements.push_back(&impl_->systemId_);
+        elements.push_back(&impl_->password_);
+        elements.push_back(&impl_->systemType_);
+        elements.push_back(&impl_->interfaceVersion_);
+        elements.push_back(&impl_->addrTon_);
+        elements.push_back(&impl_->addrNpi_);
+        elements.push_back(&impl_->addressRange_);
+    }
+
+    bool BindTransmitter::IsValidHeader() const
+    {
+        return false;
     }
 }

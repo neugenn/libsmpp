@@ -2,7 +2,6 @@
 #define BINDTRANSMITTER_H
 
 #include "Pdu.h"
-#include "COctetString.h"
 
 namespace SMPP
 {
@@ -72,20 +71,12 @@ namespace SMPP
 
     protected:
         BindTransmitter(const PduHeader& h);
-        virtual void GetBodyElements(std::vector<const PduDataType *> &elements) const;
 
     private:
-//        void initBody(const unsigned char* data);
-
-    private:
-        CString systemId_;
-        CString password_;
-        CString systemType_;
-        OneByteInteger interfaceVersion_;
-        OneByteInteger addrTon_;
-        OneByteInteger addrNpi_;
-        CString addressRange_;
-        mutable const unsigned char* data_;
+        virtual void GetBody(std::vector<const PduDataType *> &elements) const;
+        virtual bool IsValidHeader() const;
+        class BindTransmitterPrivate;
+        BindTransmitterPrivate* impl_;
     };
 }
 

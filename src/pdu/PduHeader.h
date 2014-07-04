@@ -2,6 +2,7 @@
 #define PDUHEADER_H
 
 #include "Integer.h"
+#include "IntegerPrivate.h"
 #include "CommandId.h"
 #include "CommandStatus.h"
 

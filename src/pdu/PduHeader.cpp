@@ -1,4 +1,5 @@
 #include "PduHeader.h"
+#include "CommandStatus.h"
 
 PduHeader::PduHeader() : PduDataType(),
 commandLen_("command_len"),
@@ -7,6 +8,7 @@ commandStatus_("command_status"),
 sequenceNum_("sequence_number"),
 data_()
 {
+    this->SetCommandStatus(SMPP::ESME_ROK);
     bzero(&data_[0], HeaderSize);
 }
 

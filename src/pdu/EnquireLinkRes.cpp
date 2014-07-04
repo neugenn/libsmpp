@@ -8,12 +8,12 @@ namespace SMPP
 
     const unsigned char* EnquireLinkRes::Data() const
     {
-        return header_.Data();
+        return header_->Data();
     }
 
     size_t EnquireLinkRes::Size() const
     {
-        return header_.Size();
+        return header_->Size();
     }
 
     size_t EnquireLinkRes::MinSize() const

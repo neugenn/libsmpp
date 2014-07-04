@@ -3,6 +3,7 @@
 
 #include <cppunit/extensions/HelperMacros.h>
 #include "Integer.h"
+#include "IntegerPrivate.h"
 
 class TwoByteIntegerTests : public CppUnit::TestFixture
 {
