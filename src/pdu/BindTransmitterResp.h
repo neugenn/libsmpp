@@ -43,9 +43,6 @@ namespace SMPP
         void SetSystemId(const std::string& id);
         const std::string& GetSystemId() const;
 
-    protected:
-        void GetBody(std::vector<const PduDataType *> &elements) const;
-
     private:
         CString systemId_;
         mutable unsigned char* data_;

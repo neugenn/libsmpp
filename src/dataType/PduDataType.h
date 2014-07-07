@@ -37,8 +37,6 @@ namespace SMPP
          */
         virtual size_t Size() const = 0;
 
-        virtual bool IsValid() const = 0;
-
     private:
         std::string name_;
     };

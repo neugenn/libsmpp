@@ -120,10 +120,4 @@ namespace SMPP
     {
         return systemId_.Value();
     }
-
-    void BindTransmitterResp::GetBody(std::vector<const PduDataType *> &elements) const
-    {
-        elements.clear();
-        elements.push_back(&systemId_);
-    }
 }

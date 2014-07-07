@@ -147,7 +147,7 @@ namespace SMPP
     BindTransmitter::BindTransmitter(const PduHeader& rsh) : Pdu(),
     impl_(new BindTransmitterPrivate)
     {
-        this->SetHeader(rsh);
+        *header_ = rsh;
         header_->SetCommandLength(BindTransmitterPrivate::MinSize());
     }
 
@@ -230,18 +230,6 @@ namespace SMPP
     size_t BindTransmitter::Size() const
     {
         return header_->Size() + impl_->Size();
-    }
-
-    void BindTransmitter::GetBody(std::vector<const PduDataType *> &elements) const
-    {
-        elements.clear();
-        elements.push_back(&impl_->systemId_);
-        elements.push_back(&impl_->password_);
-        elements.push_back(&impl_->systemType_);
-        elements.push_back(&impl_->interfaceVersion_);
-        elements.push_back(&impl_->addrTon_);
-        elements.push_back(&impl_->addrNpi_);
-        elements.push_back(&impl_->addressRange_);
     }
 
     bool BindTransmitter::IsValidHeader() const

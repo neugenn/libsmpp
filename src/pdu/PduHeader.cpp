@@ -41,11 +41,6 @@ namespace SMPP
             return &data_[0];
         }
 
-        bool IsValid() const
-        {
-            return ( commandLen_.IsValid() && commandId_.IsValid() && commandStatus_.IsValid() && sequenceNum_.IsValid() );
-        }
-
         static const size_t Size = 16; //bytes
 
         SMPP::FourByteInteger commandLen_;
@@ -156,10 +151,5 @@ namespace SMPP
     size_t PduHeader::Size() const
     {
         return PduHeaderPrivate::Size;
-    }
-
-    bool PduHeader::IsValid() const
-    {
-        return impl_->IsValid();
     }
 }

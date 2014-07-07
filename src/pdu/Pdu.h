@@ -5,7 +5,6 @@
 #include "CommandId.h"
 #include "CommandStatus.h"
 #include <string>
-#include <vector>
 
 namespace SMPP
 {
@@ -46,6 +45,8 @@ namespace SMPP
          */
         void SetSequenceNumber(value_t value);
 
+        SMPP::CommandStatus GetCommandError() const;
+
         /*!
          * @brief Prepares the formatted content of the PDU
          * @param[out] s The content of the PDU
@@ -63,16 +64,13 @@ namespace SMPP
         virtual size_t MaxSize() const = 0;
 
         bool IsValid() const;
-        SMPP::CommandStatus GetCommandError() const;
 
     protected:
-        void SetHeader(const PduHeader& h);
         void UpdateCommandLength();
 
     private:
-        virtual void GetBody(std::vector<const PduDataType*>& elements) const;
-        virtual bool IsValidHeader() const;
-        bool IsValidBody() const;
+        bool IsValidHeader() const;
+        virtual bool IsValidBody() const;
 
     protected:
         PduHeader* header_;

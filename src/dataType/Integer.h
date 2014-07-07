@@ -44,8 +44,6 @@ namespace SMPP
          */
         virtual size_t Size() const;
 
-        virtual bool IsValid() const;
-
         /*!
          * @brief Set the value of the integer object
          * @throw std::invalid_argument The value exceeds the maximum allowed

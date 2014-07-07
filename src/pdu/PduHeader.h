@@ -41,12 +41,6 @@ namespace SMPP
          */
         virtual size_t Size() const;
 
-        /*!
-         * \brief IsValid
-         * \return
-         */
-        virtual bool IsValid() const;
-
         value_t CommandLength() const;
         void SetCommandLength(value_t len);
 

@@ -73,7 +73,6 @@ namespace SMPP
         BindTransmitter(const PduHeader& h);
 
     private:
-        virtual void GetBody(std::vector<const PduDataType *> &elements) const;
         virtual bool IsValidHeader() const;
         class BindTransmitterPrivate;
         BindTransmitterPrivate* impl_;

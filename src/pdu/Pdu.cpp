@@ -81,11 +81,6 @@ namespace SMPP
         header_->SetCommandLength(this->Size());
     }
 
-    void Pdu::SetHeader(const PduHeader& h)
-    {
-        *header_ = h;
-    }
-
     bool Pdu::IsValid() const
     {
         bool res = false;
@@ -118,11 +113,6 @@ namespace SMPP
         header_->GetFormattedContent(s);
     }
 
-    void Pdu::GetBody(std::vector<const PduDataType *> & /*elements*/) const
-    {
-
-    }
-
     bool Pdu::IsValidHeader() const
     {
         return true;
@@ -130,22 +120,7 @@ namespace SMPP
 
     bool Pdu::IsValidBody() const
     {
-        std::vector<const PduDataType*> elements_;
-        this->GetBody(elements_);
-
-        std::vector<const PduDataType*>::const_iterator it = elements_.begin();
-        std::vector<const PduDataType*>::const_iterator itEnd = elements_.end();
-        bool res = true;
-        for (; it != itEnd; ++it)
-        {
-            if (!(*it)->IsValid())
-            {
-                res = false;
-                break;
-            }
-        }
-
-        return res;
+        return false;
     }
 }
 
