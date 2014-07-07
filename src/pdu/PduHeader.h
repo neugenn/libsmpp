@@ -9,7 +9,7 @@
 class PduHeader : public PduDataType
 {
 public:
-    static const size_t HeaderSize = 16; //bytes
+    static const size_t HeaderSize;
 
     /*!
      * \brief Creates an empty PduHeader object
@@ -22,6 +22,12 @@ public:
      * \throw std::invalid_argument The data buffer is NULL
      */
     PduHeader(const unsigned char*& data);
+
+    PduHeader(const PduHeader& rsh);
+
+    PduHeader& operator=(const PduHeader& rsh);
+
+    ~PduHeader();
 
     /*!
      * \brief
@@ -56,11 +62,8 @@ public:
     void GetFormattedContent(std::string& res) const;
 
 private:
-    SMPP::FourByteInteger commandLen_;
-    SMPP::FourByteInteger commandId_;
-    SMPP::FourByteInteger commandStatus_;
-    SMPP::FourByteInteger sequenceNum_;
-    mutable unsigned char data_[HeaderSize];
+    class PduHeaderPrivate;
+    PduHeaderPrivate* impl_;
 };
 
 #endif // PDUHEADER_H

@@ -2,4 +2,4 @@
 *.o
 
 #ignore the binary
-*.so
+*.so *.dll
