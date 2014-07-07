@@ -1,4 +1,6 @@
 #include "EnquireLink.h"
+#include "PduHeader.h"
+
 
 namespace SMPP
 {

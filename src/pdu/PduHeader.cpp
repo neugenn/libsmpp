@@ -1,162 +1,165 @@
 #include "PduHeader.h"
 #include "CommandStatus.h"
+#include "Integer.h"
+#include "IntegerPrivate.h"
 
-class PduHeader::PduHeaderPrivate
+namespace SMPP
 {
-public:
-    PduHeaderPrivate() :
-    commandLen_("command_len"),
-    commandId_("command_id"),
-    commandStatus_("command_status"),
-    sequenceNum_("sequence_number"),
-    data_()
-    {}
-
-    PduHeaderPrivate(const unsigned char*& data) :
-    commandLen_(data, "command_len"),
-    commandId_(data, "command_id"),
-    commandStatus_(data, "command_status"),
-    sequenceNum_(data, "sequence_number"),
-    data_()
-    {}
-
-    unsigned const char* Data()
+    class PduHeader::PduHeaderPrivate
     {
-        bzero(&data_[0], sizeof(data_));
+    public:
+        PduHeaderPrivate() :
+        commandLen_("command_len"),
+        commandId_("command_id"),
+        commandStatus_("command_status"),
+        sequenceNum_("sequence_number"),
+        data_()
+        {}
 
-        memcpy(data_, commandLen_.Data(), commandLen_.Size());
-        size_t offset = commandLen_.Size();
+        PduHeaderPrivate(const unsigned char*& data) :
+        commandLen_(data, "command_len"),
+        commandId_(data, "command_id"),
+        commandStatus_(data, "command_status"),
+        sequenceNum_(data, "sequence_number"),
+        data_()
+        {}
 
-        memcpy(data_ + offset, commandId_.Data(), commandId_.Size());
-        offset += commandId_.Size();
+        unsigned const char* Data()
+        {
+            bzero(&data_[0], sizeof(data_));
 
-        memcpy(data_ + offset, commandStatus_.Data(), commandStatus_.Size());
-        offset += commandStatus_.Size();
+            memcpy(data_, commandLen_.Data(), commandLen_.Size());
+            size_t offset = commandLen_.Size();
 
-        memcpy(data_ + offset, sequenceNum_.Data(), sequenceNum_.Size());
-        return &data_[0];
+            memcpy(data_ + offset, commandId_.Data(), commandId_.Size());
+            offset += commandId_.Size();
+
+            memcpy(data_ + offset, commandStatus_.Data(), commandStatus_.Size());
+            offset += commandStatus_.Size();
+
+            memcpy(data_ + offset, sequenceNum_.Data(), sequenceNum_.Size());
+            return &data_[0];
+        }
+
+        bool IsValid() const
+        {
+            return ( commandLen_.IsValid() && commandId_.IsValid() && commandStatus_.IsValid() && sequenceNum_.IsValid() );
+        }
+
+        static const size_t Size = 16; //bytes
+
+        SMPP::FourByteInteger commandLen_;
+        SMPP::FourByteInteger commandId_;
+        SMPP::FourByteInteger commandStatus_;
+        SMPP::FourByteInteger sequenceNum_;
+        unsigned char data_[Size];
+    };
+
+    PduHeader::PduHeader() :
+    PduDataType(),
+    impl_(new PduHeaderPrivate)
+    {
+        this->SetCommandStatus(SMPP::ESME_ROK);
     }
 
-    bool IsValid() const
+    PduHeader::PduHeader(const unsigned char*& data) :
+    PduDataType(),
+    impl_(new PduHeaderPrivate(data))
     {
-        return ( commandLen_.IsValid() && commandId_.IsValid() && commandStatus_.IsValid() && sequenceNum_.IsValid() );
     }
 
-    static const size_t Size = 16; //bytes
-
-    SMPP::FourByteInteger commandLen_;
-    SMPP::FourByteInteger commandId_;
-    SMPP::FourByteInteger commandStatus_;
-    SMPP::FourByteInteger sequenceNum_;
-    unsigned char data_[Size];
-};
-
-const size_t PduHeader::HeaderSize = PduHeader::PduHeaderPrivate::Size;
-
-PduHeader::PduHeader() :
-PduDataType(),
-impl_(new PduHeaderPrivate)
-{
-    this->SetCommandStatus(SMPP::ESME_ROK);
-}
-
-PduHeader::PduHeader(const unsigned char*& data) :
-PduDataType(),
-impl_(new PduHeaderPrivate(data))
-{
-}
-
-PduHeader::PduHeader(const PduHeader &rsh) :
-PduDataType(rsh),
-impl_(NULL)
-{
-    const unsigned char* pc = rsh.Data();
-    impl_ = new PduHeaderPrivate(pc);
-}
-
-PduHeader& PduHeader::operator=(const PduHeader& rsh)
-{
-    if (this != &rsh)
+    PduHeader::PduHeader(const PduHeader &rsh) :
+    PduDataType(rsh),
+    impl_(NULL)
     {
-        this->SetCommandLength(rsh.CommandLength());
-        this->SetCommandId(rsh.CommandId());
-        this->SetCommandStatus(rsh.CommandStatus());
-        this->SetSequenceNumber(rsh.SequenceNumber());
+        const unsigned char* pc = rsh.Data();
+        impl_ = new PduHeaderPrivate(pc);
     }
 
-    return *this;
-}
-
-PduHeader::~PduHeader()
-{
-    if (NULL != impl_)
+    PduHeader& PduHeader::operator=(const PduHeader& rsh)
     {
-        delete impl_;
+        if (this != &rsh)
+        {
+            this->SetCommandLength(rsh.CommandLength());
+            this->SetCommandId(rsh.CommandId());
+            this->SetCommandStatus(rsh.CommandStatus());
+            this->SetSequenceNumber(rsh.SequenceNumber());
+        }
+
+        return *this;
     }
-}
 
-SMPP::FourByteInteger::value_t PduHeader::CommandLength() const
-{
-    return impl_->commandLen_.Value();
-}
+    PduHeader::~PduHeader()
+    {
+        if (NULL != impl_)
+        {
+            delete impl_;
+        }
+    }
 
-void PduHeader::SetCommandLength(SMPP::FourByteInteger::value_t len)
-{
-    impl_->commandLen_.SetValue(len);
-}
+    value_t PduHeader::CommandLength() const
+    {
+        return impl_->commandLen_.Value();
+    }
 
-SMPP::CommandId PduHeader::CommandId() const
-{
-    return SMPP::CommandId(impl_->commandId_.Value());
-}
+    void PduHeader::SetCommandLength(value_t len)
+    {
+        impl_->commandLen_.SetValue(len);
+    }
 
-void PduHeader::SetCommandId(SMPP::CommandId id)
-{
-    impl_->commandId_.SetValue(id);
-}
+    SMPP::CommandId PduHeader::CommandId() const
+    {
+        return SMPP::CommandId(impl_->commandId_.Value());
+    }
 
-SMPP::CommandStatus PduHeader::CommandStatus() const
-{
-    return SMPP::CommandStatus(impl_->commandStatus_.Value());
-}
+    void PduHeader::SetCommandId(SMPP::CommandId id)
+    {
+        impl_->commandId_.SetValue(id);
+    }
 
-void PduHeader::SetCommandStatus(SMPP::CommandStatus status)
-{
-    impl_->commandStatus_.SetValue(status);
-}
+    SMPP::CommandStatus PduHeader::CommandStatus() const
+    {
+        return SMPP::CommandStatus(impl_->commandStatus_.Value());
+    }
 
-SMPP::FourByteInteger::value_t PduHeader::SequenceNumber() const
-{
-    return impl_->sequenceNum_.Value();
-}
+    void PduHeader::SetCommandStatus(SMPP::CommandStatus status)
+    {
+        impl_->commandStatus_.SetValue(status);
+    }
 
-void PduHeader::SetSequenceNumber(SMPP::FourByteInteger::value_t val)
-{
-    impl_->sequenceNum_.SetValue(val);
-}
+    value_t PduHeader::SequenceNumber() const
+    {
+        return impl_->sequenceNum_.Value();
+    }
 
-void PduHeader::GetFormattedContent(std::string &res) const
-{
-    std::stringstream s;
-    s << "command_len: 0x" << impl_->commandLen_ << " (" << impl_->commandLen_.Value() << ")" << std::endl;
-    s << "command_id: 0x" << impl_->commandId_ << std::endl;
-    s << "command_status: 0x" << impl_->commandStatus_ << std::endl;
-    s << "sequence_number: 0x" << impl_->sequenceNum_ << " (" << impl_->sequenceNum_.Value() << ")" << std::endl;
+    void PduHeader::SetSequenceNumber(value_t val)
+    {
+        impl_->sequenceNum_.SetValue(val);
+    }
 
-    res = s.str();
-}
+    void PduHeader::GetFormattedContent(std::string &res) const
+    {
+        std::stringstream s;
+        s << "command_len: 0x" << impl_->commandLen_ << " (" << impl_->commandLen_.Value() << ")" << std::endl;
+        s << "command_id: 0x" << impl_->commandId_ << std::endl;
+        s << "command_status: 0x" << impl_->commandStatus_ << std::endl;
+        s << "sequence_number: 0x" << impl_->sequenceNum_ << " (" << impl_->sequenceNum_.Value() << ")" << std::endl;
 
-const unsigned char* PduHeader::Data() const
-{
-    return impl_->Data();
-}
+        res = s.str();
+    }
 
-size_t PduHeader::Size() const
-{
-    return PduHeader::HeaderSize;
-}
+    const unsigned char* PduHeader::Data() const
+    {
+        return impl_->Data();
+    }
 
-bool PduHeader::IsValid() const
-{
-    return impl_->IsValid();
+    size_t PduHeader::Size() const
+    {
+        return PduHeaderPrivate::Size;
+    }
+
+    bool PduHeader::IsValid() const
+    {
+        return impl_->IsValid();
+    }
 }

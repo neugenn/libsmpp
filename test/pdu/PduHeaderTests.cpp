@@ -34,7 +34,7 @@ class PduHeaderTests : public CppUnit::TestFixture
     void testSequence();
 
     private:
-    PduHeader* pHeader_;
+    SMPP::PduHeader* pHeader_;
 
     private:
     static const unsigned char Data[20];
@@ -49,6 +49,8 @@ const unsigned char PduHeaderTests::Data[20] = {
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(PduHeaderTests);
+
+using SMPP::PduHeader;
 
 void PduHeaderTests::setUp()
 {
@@ -110,7 +112,7 @@ void PduHeaderTests::testEmptyHeader()
 
 void PduHeaderTests::testCommandLen()
 {
-    CPPUNIT_ASSERT_EQUAL(SMPP::FourByteInteger::value_t(0x00000010), pHeader_->CommandLength());
+    CPPUNIT_ASSERT_EQUAL(SMPP::value_t(0x00000010), pHeader_->CommandLength());
 }
 
 void PduHeaderTests::testCommandId()
@@ -125,7 +127,7 @@ void PduHeaderTests::testCommandStatus()
 
 void PduHeaderTests::testSequence()
 {
-    CPPUNIT_ASSERT_EQUAL(SMPP::FourByteInteger::value_t(0x00000004), pHeader_->SequenceNumber());
+    CPPUNIT_ASSERT_EQUAL(SMPP::value_t(0x00000004), pHeader_->SequenceNumber());
 }
 
 #endif // PDUHEADERTESTS_H_

@@ -1,4 +1,5 @@
 #include "BindTransmitterResp.h"
+#include "PduHeader.h"
 
 namespace SMPP
 {

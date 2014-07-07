@@ -5,41 +5,47 @@
 #include <ostream>
 #include <sstream>
 #include <cstring>
+#include <stdexcept>
 
-/*!
- * @brief Base class for all PDU data types
- */
-class PduDataType
+namespace SMPP
 {
-public:
-    PduDataType();
-    PduDataType(const char* name);
-    virtual ~PduDataType() {}
+    typedef uint64_t value_t;
 
     /*!
-     * @brief Name
-     * @return
+     * @brief Base class for all PDU data types
      */
-    const std::string& Name() const;
+    class PduDataType
+    {
+    public:
+        PduDataType();
+        PduDataType(const char* name);
+        virtual ~PduDataType() {}
 
-    /*!
-     * @brief Access to the underlying storage of the data type
-     */
-    virtual const unsigned char* Data() const = 0;
+        /*!
+         * @brief Name
+         * @return
+         */
+        const std::string& Name() const;
 
-    /*!
-     * @brief The size of the underlying storage buffer
-     */
-    virtual size_t Size() const = 0;
+        /*!
+         * @brief Access to the underlying storage of the data type
+         */
+        virtual const unsigned char* Data() const = 0;
 
-    virtual bool IsValid() const = 0;
+        /*!
+         * @brief The size of the underlying storage buffer
+         */
+        virtual size_t Size() const = 0;
 
-private:
-    std::string name_;
-};
+        virtual bool IsValid() const = 0;
 
-std::ostream& operator<<(std::ostream& s, const PduDataType& data);
-bool operator==(const PduDataType& lsh, const PduDataType& rsh);
-bool operator!=(const PduDataType& lsh, const PduDataType& rsh);
+    private:
+        std::string name_;
+    };
+
+    std::ostream& operator<<(std::ostream& s, const PduDataType& data);
+    bool operator==(const PduDataType& lsh, const PduDataType& rsh);
+    bool operator!=(const PduDataType& lsh, const PduDataType& rsh);
+}
 
 #endif // PDUDATATYPE_H_

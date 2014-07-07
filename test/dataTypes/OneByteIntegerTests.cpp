@@ -77,7 +77,7 @@ void OneByteIntegerTests::testInitialData()
 void OneByteIntegerTests::testCreateNullIntegerValue()
 {
     SMPP::OneByteInteger i;
-    CPPUNIT_ASSERT_EQUAL(SMPP::OneByteInteger::value_t(0), i.Value());
+    CPPUNIT_ASSERT_EQUAL(SMPP::value_t(0), i.Value());
 }
 
 void OneByteIntegerTests::testCreateNullIntegerData()
@@ -91,7 +91,7 @@ void OneByteIntegerTests::testCreateNullIntegerData()
 void OneByteIntegerTests::testSetValue()
 {
     pInt_->SetValue(0xFF);
-    CPPUNIT_ASSERT_EQUAL(SMPP::OneByteInteger::value_t(0xFF), pInt_->Value());
+    CPPUNIT_ASSERT_EQUAL(SMPP::value_t(0xFF), pInt_->Value());
 }
 
 void OneByteIntegerTests::testSetValueData()
@@ -109,7 +109,7 @@ void OneByteIntegerTests::testSetValueOverflow()
 
 void OneByteIntegerTests::testMaxValue()
 {
-    CPPUNIT_ASSERT_EQUAL(SMPP::OneByteInteger::value_t(0xFF), SMPP::OneByteInteger::MaxValue());
+    CPPUNIT_ASSERT_EQUAL(SMPP::value_t(0xFF), SMPP::OneByteInteger::MaxValue());
 }
 
 #endif // ONEBYTEINTEGERTESTS_H_

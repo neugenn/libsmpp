@@ -14,8 +14,6 @@ namespace SMPP
     class Integer : public PduDataType
     {
     public:
-        typedef uint64_t value_t;
-
         /*!
          * @brief The maximum value which can be hold by an Integer object
          */

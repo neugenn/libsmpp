@@ -2,16 +2,19 @@
 #define PDU_H
 
 #include "PduDataType.h"
+#include "CommandId.h"
+#include "CommandStatus.h"
 #include <string>
 #include <vector>
-#include "PduHeader.h"
 
 namespace SMPP
 {
+    class PduHeader;
+
     class Pdu : public PduDataType
     {
     public:
-        static SMPP::FourByteInteger::value_t MaxSequenceNumber();
+        static value_t MaxSequenceNumber();
 
         /*!
          * \brief Creates an empty Pdu object
@@ -28,20 +31,20 @@ namespace SMPP
         Pdu& operator=(const Pdu& rsh);
         virtual ~Pdu();
 
-        SMPP::FourByteInteger::value_t CommandLength() const;
+        value_t CommandLength() const;
         SMPP::CommandId CommandId() const;
 
         SMPP::CommandStatus CommandStatus() const;
         void SetCommandStatus(SMPP::CommandStatus status);
 
-        SMPP::FourByteInteger::value_t SequenceNumber() const;
+        value_t SequenceNumber() const;
 
         /*!
          * \brief SetSequenceNumber
          * \param value
          * \throw std::invalid_argument The value exeeds the maximum allowed value
          */
-        void SetSequenceNumber(SMPP::FourByteInteger::value_t value);
+        void SetSequenceNumber(value_t value);
 
         /*!
          * @brief Prepares the formatted content of the PDU

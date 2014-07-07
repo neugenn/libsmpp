@@ -23,7 +23,7 @@ namespace SMPP
     }
 
     template <typename T>
-    typename Integer<T>::value_t Integer<T>::MaxValue()
+    value_t Integer<T>::MaxValue()
     {
         return std::numeric_limits<T>::max();
     }
@@ -90,7 +90,7 @@ namespace SMPP
     }
 
     template <typename T>
-    typename Integer<T>::value_t Integer<T>::Value() const
+    value_t Integer<T>::Value() const
     {
         T val = T(0);
         const unsigned char* buf = reinterpret_cast<const unsigned char*>(&data_[0]);

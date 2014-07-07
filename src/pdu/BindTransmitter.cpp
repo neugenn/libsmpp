@@ -81,12 +81,12 @@ namespace SMPP
 
         static size_t MinSize()
         {
-            return PduHeader::HeaderSize + 4 * CString().Size() + 3 * OneByteInteger().Size();
+            return PduHeader().Size() + 4 * CString().Size() + 3 * OneByteInteger().Size();
         }
 
         static size_t MaxSize()
         {
-            return PduHeader::HeaderSize + BindTransmitter::SystemIdMaxLen + BindTransmitter::PasswordMaxLen + \
+            return PduHeader().Size() + BindTransmitter::SystemIdMaxLen + BindTransmitter::PasswordMaxLen + \
             BindTransmitter::SystemTypeMaxLen + BindTransmitter::AddressRangeMaxLen + 3 * OneByteInteger().Size();
         }
 

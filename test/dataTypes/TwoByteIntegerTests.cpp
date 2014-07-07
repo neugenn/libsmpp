@@ -77,7 +77,7 @@ void TwoByteIntegerTests::testInitialData()
 void TwoByteIntegerTests::testCreateNullIntegerValue()
 {
     SMPP::TwoByteInteger i;
-    CPPUNIT_ASSERT_EQUAL(SMPP::TwoByteInteger::value_t(0), i.Value());
+    CPPUNIT_ASSERT_EQUAL(SMPP::value_t(0), i.Value());
 }
 
 void TwoByteIntegerTests::testCreateNullIntegerData()
@@ -91,7 +91,7 @@ void TwoByteIntegerTests::testCreateNullIntegerData()
 void TwoByteIntegerTests::testSetValue()
 {
     pInt_->SetValue(0x0102);
-    CPPUNIT_ASSERT_EQUAL(SMPP::TwoByteInteger::value_t(0x0102), pInt_->Value());
+    CPPUNIT_ASSERT_EQUAL(SMPP::value_t(0x0102), pInt_->Value());
 }
 
 void TwoByteIntegerTests::testSetValueData()
@@ -109,7 +109,7 @@ void TwoByteIntegerTests::testSetValueOverflow()
 
 void TwoByteIntegerTests::testMaxSize()
 {
-    CPPUNIT_ASSERT_EQUAL(SMPP::TwoByteInteger::value_t(0xFFFF), SMPP::TwoByteInteger::MaxValue());
+    CPPUNIT_ASSERT_EQUAL(SMPP::value_t(0xFFFF), SMPP::TwoByteInteger::MaxValue());
 }
 
 #endif // TWOBYTEINTEGERTESTS_H_

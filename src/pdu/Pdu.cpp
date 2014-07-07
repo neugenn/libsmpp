@@ -1,9 +1,11 @@
 #include "Pdu.h"
+#include "PduHeader.h"
 #include <string.h>
+#include <stdexcept>
 
 namespace SMPP
 {
-    SMPP::FourByteInteger::value_t Pdu::MaxSequenceNumber()
+    value_t Pdu::MaxSequenceNumber()
     {
         return 0x7FFFFFFF;
     }
@@ -39,7 +41,7 @@ namespace SMPP
         }
     }
 
-    SMPP::FourByteInteger::value_t Pdu::CommandLength() const
+    value_t Pdu::CommandLength() const
     {
         return header_->CommandLength();
     }
@@ -59,12 +61,12 @@ namespace SMPP
         return header_->SetCommandStatus(status);
     }
 
-    SMPP::FourByteInteger::value_t Pdu::SequenceNumber() const
+    value_t Pdu::SequenceNumber() const
     {
         return header_->SequenceNumber();
     }
 
-    void Pdu::SetSequenceNumber(SMPP::FourByteInteger::value_t value)
+    void Pdu::SetSequenceNumber(value_t value)
     {
         if (value > Pdu::MaxSequenceNumber())
         {
