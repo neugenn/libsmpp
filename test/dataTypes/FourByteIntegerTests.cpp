@@ -66,7 +66,7 @@ void FourByteIntegerTests::testCreateWithNullDataBuffer()
 
 void FourByteIntegerTests::testSize()
 {
-    CPPUNIT_ASSERT_EQUAL(size_t(4), pInt_->Size());
+    CPPUNIT_ASSERT_EQUAL(SMPP::value_t(4), pInt_->Size());
 }
 
 void FourByteIntegerTests::testInitialData()

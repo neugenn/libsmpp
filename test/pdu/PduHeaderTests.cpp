@@ -7,7 +7,6 @@
 class PduHeaderTests : public CppUnit::TestFixture
 {
     CPPUNIT_TEST_SUITE(PduHeaderTests);
-    CPPUNIT_TEST(testCreateWithNullData);
     CPPUNIT_TEST(testEmptyHeader);
     CPPUNIT_TEST(testData);
     CPPUNIT_TEST(testSize);
@@ -22,7 +21,6 @@ class PduHeaderTests : public CppUnit::TestFixture
     public:
     virtual void setUp();
     virtual void tearDown();
-    void testCreateWithNullData();
     void testEmptyHeader();
     void testData();
     void testSize();
@@ -35,17 +33,6 @@ class PduHeaderTests : public CppUnit::TestFixture
 
     private:
     SMPP::PduHeader* pHeader_;
-
-    private:
-    static const unsigned char Data[20];
-};
-
-const unsigned char PduHeaderTests::Data[20] = {
-        0x00, 0x00, 0x00, 0x10, //command_len
-        0x00, 0x00, 0x00, 0x01, //command_id (BIND_RECEIVER)
-        0x00, 0x00, 0x00, 0x04, //command_status (ESME_RINVBNDSTS)
-        0x00, 0x00, 0x00, 0x04, //sequence_number
-        0x01, 0x02, 0x03, 0x04 //other data
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION(PduHeaderTests);
@@ -54,8 +41,7 @@ using SMPP::PduHeader;
 
 void PduHeaderTests::setUp()
 {
-    const unsigned char* r = &Data[0];
-    pHeader_ = new PduHeader(r);
+    pHeader_ = new PduHeader;
     CPPUNIT_ASSERT(NULL != pHeader_);
 }
 
@@ -73,32 +59,22 @@ void PduHeaderTests::testData()
 
 void PduHeaderTests::testSize()
 {
-    CPPUNIT_ASSERT_EQUAL(size_t(16), pHeader_->Size());
-}
-
-void PduHeaderTests::testCreateWithNullData()
-{
-    const unsigned char* r = NULL;
-    CPPUNIT_ASSERT_THROW(new PduHeader(r), std::invalid_argument);
+    CPPUNIT_ASSERT_EQUAL(SMPP::value_t(16), pHeader_->Size());
 }
 
 void PduHeaderTests::testOperatorEqual()
 {
-    const unsigned char* r1 = &Data[0];
-    PduHeader h1(r1);
-
-    const unsigned char* r2 = &Data[0];
-    PduHeader h2(r2);
+    PduHeader h1;
+    PduHeader h2;
     CPPUNIT_ASSERT_EQUAL(h1, h2);
 }
 
 void PduHeaderTests::testOperatorNotEqual()
 {
-    const unsigned char* r1 = &Data[0];
-    PduHeader h1(r1);
+    PduHeader h1;
+    PduHeader h2;
+    h2.SetSequenceNumber(12);
 
-    const unsigned char* r2 = &Data[1];
-    PduHeader h2(r2);
     CPPUNIT_ASSERT(h1 != h2);
 }
 
@@ -112,7 +88,7 @@ void PduHeaderTests::testEmptyHeader()
 
 void PduHeaderTests::testCommandLen()
 {
-    CPPUNIT_ASSERT_EQUAL(SMPP::value_t(0x00000010), pHeader_->CommandLength());
+    CPPUNIT_ASSERT_EQUAL(SMPP::value_t(0), pHeader_->CommandLength());
 }
 
 void PduHeaderTests::testCommandId()
@@ -122,12 +98,12 @@ void PduHeaderTests::testCommandId()
 
 void PduHeaderTests::testCommandStatus()
 {
-    CPPUNIT_ASSERT_EQUAL(SMPP::ESME_RINVBNDSTS, pHeader_->CommandStatus());
+    CPPUNIT_ASSERT_EQUAL(SMPP::ESME_ROK, pHeader_->CommandStatus());
 }
 
 void PduHeaderTests::testSequence()
 {
-    CPPUNIT_ASSERT_EQUAL(SMPP::value_t(0x00000004), pHeader_->SequenceNumber());
+    CPPUNIT_ASSERT_EQUAL(SMPP::value_t(0x00000000), pHeader_->SequenceNumber());
 }
 
 #endif // PDUHEADERTESTS_H_

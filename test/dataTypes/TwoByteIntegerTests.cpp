@@ -64,7 +64,7 @@ void TwoByteIntegerTests::testCreateWithNullDataBuffer()
 
 void TwoByteIntegerTests::testSize()
 {
-    CPPUNIT_ASSERT_EQUAL(size_t(2), pInt_->Size());
+    CPPUNIT_ASSERT_EQUAL(SMPP::value_t(2), pInt_->Size());
 }
 
 void TwoByteIntegerTests::testInitialData()

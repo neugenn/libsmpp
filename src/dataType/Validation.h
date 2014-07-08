@@ -1,7 +1,7 @@
 #ifndef VALIDATION_H
 #define VALIDATION_H
 
-#include <cstddef>
+#include "PduDataType.h"
 
 namespace SMPP
 {
@@ -15,7 +15,7 @@ namespace SMPP
         virtual ~Validation() {}
 
     public:
-        virtual bool IsValid(const unsigned char* data, size_t size) const = 0;
+        virtual bool IsValid(const unsigned char* data, value_t size) const = 0;
     };
 }
 

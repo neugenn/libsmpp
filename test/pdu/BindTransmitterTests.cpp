@@ -11,14 +11,15 @@ public:
     TestingBindTransmitter() : SMPP::BindTransmitter()
     {}
 
+private:
     virtual void GetFormattedContent(std::string& s) const
     {
-        const size_t pduSize = this->Size();
+        const SMPP::value_t pduSize = this->Size();
         unsigned char* pdu = new unsigned char[pduSize];
         memcpy(pdu, this->Data(), pduSize);
 
         std::stringstream str;
-        for (size_t i = 0; i < pduSize; ++i)
+        for (SMPP::value_t i = 0; i < pduSize; ++i)
         {
             str << std::setfill('0') << std::setw(2) << std::uppercase << std::hex;
             str << static_cast<unsigned int>(pdu[i]);
@@ -41,10 +42,9 @@ class BindTransmitterTests : public CppUnit::TestFixture
     CPPUNIT_TEST(testCreateEmpty);
     CPPUNIT_TEST(testCreateWithNullData);
     CPPUNIT_TEST(testCreateWithShortCommandLen);
-    CPPUNIT_TEST(testCreateWithLongCommandLen);
+//    CPPUNIT_TEST(testCreateWithLongCommandLen);
     CPPUNIT_TEST(testCreateWithInvalidCommandId);
     CPPUNIT_TEST(testCommandId);
-    CPPUNIT_TEST(testCommandIdFromValidData);
     CPPUNIT_TEST(testCopyConstruction);
     CPPUNIT_TEST(testAssignment);
     CPPUNIT_TEST_SUITE_END();
@@ -61,10 +61,9 @@ class BindTransmitterTests : public CppUnit::TestFixture
     void testCreateEmpty();
     void testCreateWithNullData();
     void testCommandId();
-    void testCommandIdFromValidData();
     void testCreateWithInvalidCommandId();
     void testCreateWithShortCommandLen();
-    void testCreateWithLongCommandLen();
+//    void testCreateWithLongCommandLen();
     void testCopyConstruction();
     void testAssignment();
 
@@ -72,15 +71,11 @@ class BindTransmitterTests : public CppUnit::TestFixture
     SMPP::BindTransmitter* pPdu_;
 
     public:
-    static const unsigned char ValidBindTransmitterData[33];
+    static const unsigned char ValidBindTransmitterBody[33];
 };
 
-const unsigned char BindTransmitterTests::ValidBindTransmitterData[33] =
+const unsigned char BindTransmitterTests::ValidBindTransmitterBody[33] =
 {
-    0x00, 0x00, 0x00, 0x21, // command_length
-    0x00, 0x00, 0x00, 0x02, // command_id
-    0x00, 0x00, 0x00, 0x00, // command_status
-    0x00, 0x00, 0x00, 0x01, // sequence_number
     0x73, 0x6d, 0x73, 0x00,  // system_id
     0x70, 0x61, 0x31, 0x00, // password
     0x4f, 0x54, 0x41, 0x00, // system_type
@@ -95,7 +90,10 @@ CPPUNIT_TEST_SUITE_REGISTRATION(BindTransmitterTests);
 
 void BindTransmitterTests::setUp()
 {
-    pPdu_ = new SMPP::BindTransmitter(&ValidBindTransmitterData[0], sizeof(ValidBindTransmitterData));
+    SMPP::PduHeader h;
+    h.SetCommandId(SMPP::BIND_TRANSMITTER);
+    h.SetCommandLength(33);
+    pPdu_ = new SMPP::BindTransmitter(h, &ValidBindTransmitterBody[0]);
     CPPUNIT_ASSERT(NULL != pPdu_);
 }
 
@@ -106,34 +104,34 @@ void BindTransmitterTests::tearDown()
 
 void BindTransmitterTests::testSystemIdLen()
 {
-    CPPUNIT_ASSERT_EQUAL(size_t(16), SMPP::BindTransmitter::SystemIdMaxLen);
+    CPPUNIT_ASSERT_EQUAL(SMPP::value_t(16), SMPP::BindTransmitter::SYSTEM_ID_MAX_LEN);
 }
 
 void BindTransmitterTests::testPasswordLen()
 {
-    CPPUNIT_ASSERT_EQUAL(size_t(9), SMPP::BindTransmitter::PasswordMaxLen);
+    CPPUNIT_ASSERT_EQUAL(SMPP::value_t(9), SMPP::BindTransmitter::PASSWORD_MAX_LEN);
 }
 
 void BindTransmitterTests::testSystemTypeLen()
 {
-    CPPUNIT_ASSERT_EQUAL(size_t(13), SMPP::BindTransmitter::SystemTypeMaxLen);
+    CPPUNIT_ASSERT_EQUAL(SMPP::value_t(13), SMPP::BindTransmitter::SYSTEM_TYPE_MAX_LEN);
 }
 
 void BindTransmitterTests::testAddressRangeLen()
 {
-    CPPUNIT_ASSERT_EQUAL(size_t(41), SMPP::BindTransmitter::AddressRangeMaxLen);
+    CPPUNIT_ASSERT_EQUAL(SMPP::value_t(41), SMPP::BindTransmitter::ADDRESS_RANGE_MAX_LEN);
 }
 
 void BindTransmitterTests::testMinPduSize()
 {
     SMPP::BindTransmitter t;
-    CPPUNIT_ASSERT_EQUAL(size_t(23), t.MinSize());
+    CPPUNIT_ASSERT_EQUAL(SMPP::value_t(23), t.MinSize());
 }
 
 void BindTransmitterTests::testMaxPduSize()
 {
     SMPP::BindTransmitter t;
-    CPPUNIT_ASSERT_EQUAL(size_t(98), t.MaxSize());
+    CPPUNIT_ASSERT_EQUAL(SMPP::value_t(98), t.MaxSize());
 }
 
 void BindTransmitterTests::testCreateEmpty()
@@ -147,7 +145,8 @@ void BindTransmitterTests::testCreateEmpty()
 
 void BindTransmitterTests::testCreateWithNullData()
 {
-    CPPUNIT_ASSERT_THROW(new SMPP::BindTransmitter(NULL, 1), std::invalid_argument);
+    SMPP::PduHeader h;
+    CPPUNIT_ASSERT_THROW(new SMPP::BindTransmitter(h, NULL), std::invalid_argument);
 }
 
 void BindTransmitterTests::testCommandId()
@@ -156,20 +155,10 @@ void BindTransmitterTests::testCommandId()
     CPPUNIT_ASSERT_EQUAL(SMPP::BIND_TRANSMITTER, t.CommandId());
 }
 
-void BindTransmitterTests::testCommandIdFromValidData()
-{
-    SMPP::BindTransmitter t(&ValidBindTransmitterData[0], sizeof(ValidBindTransmitterData));
-    CPPUNIT_ASSERT_EQUAL(SMPP::BIND_TRANSMITTER, t.CommandId());
-}
-
 void BindTransmitterTests::testCreateWithInvalidCommandId()
 {
-    const unsigned char InvalidCommandIdData[] =
+    const unsigned char Body[] =
     {
-        0x00, 0x00, 0x00, 0x20, // command_length
-        0x00, 0x00, 0x00, 0x03, // command_id (invalid)
-        0x00, 0x00, 0x00, 0x00, // command_status
-        0x00, 0x00, 0x00, 0x01, // sequence_number
         0x73, 0x6d, 0x73, 0x00,  // system_id
         0x70, 0x61, 0x31, 0x00, // password
         0x4f, 0x54, 0x41, 0x00, // system_type
@@ -179,17 +168,15 @@ void BindTransmitterTests::testCreateWithInvalidCommandId()
         0x01, 0x00 // address_range
         };
 
-    CPPUNIT_ASSERT_THROW(new SMPP::BindTransmitter(&InvalidCommandIdData[0], sizeof(InvalidCommandIdData)), std::invalid_argument);
+    SMPP::PduHeader h;
+    h.SetCommandId(SMPP::BIND_RECEIVER);
+    CPPUNIT_ASSERT_THROW(new SMPP::BindTransmitter(h, &Body[0]), std::invalid_argument);
 }
 
 void BindTransmitterTests::testCreateWithShortCommandLen()
 {
-    const unsigned char InvalidShortCommandLenData[] =
+    const unsigned char Data[] =
     {
-        0x00, 0x00, 0x00, 0x01, // command_length
-        0x00, 0x00, 0x00, 0x02, // command_id
-        0x00, 0x00, 0x00, 0x00, // command_status
-        0x00, 0x00, 0x00, 0x01, // sequence_number
         0x73, 0x6d, 0x73, 0x00,  // system_id
         0x70, 0x61, 0x31, 0x00, // password
         0x4f, 0x54, 0x41, 0x00, // system_type
@@ -199,10 +186,15 @@ void BindTransmitterTests::testCreateWithShortCommandLen()
         0x01, 0x00 // address_range
         };
 
-    SMPP::BindTransmitter t(&InvalidShortCommandLenData[0], sizeof(InvalidShortCommandLenData));
+    SMPP::PduHeader h;
+    h.SetCommandId(SMPP::BIND_TRANSMITTER);
+    h.SetCommandLength(16);
+    SMPP::BindTransmitter t(h, &Data[0]);
+    std::cout << t << std::endl;
     CPPUNIT_ASSERT_EQUAL(false, t.IsValid());
 }
 
+/*
 void BindTransmitterTests::testCreateWithLongCommandLen()
 {
     const unsigned char InvalidLongCommandLenData[] =
@@ -222,6 +214,7 @@ void BindTransmitterTests::testCreateWithLongCommandLen()
 
     CPPUNIT_ASSERT_THROW(new SMPP::BindTransmitter(&InvalidLongCommandLenData[0], sizeof(InvalidLongCommandLenData)), std::invalid_argument);
 }
+*/
 
 void BindTransmitterTests::testCopyConstruction()
 {

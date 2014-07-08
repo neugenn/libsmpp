@@ -12,7 +12,7 @@ namespace SMPP
     }
 
     template <typename T>
-    COctetString<T>::COctetString(const unsigned char*& data, size_t len, const char* name) :
+    COctetString<T>::COctetString(const unsigned char*& data, size_t maxlen, const char* name) :
     PduDataType(name),
     validator_(T()),
     data_()
@@ -27,9 +27,18 @@ namespace SMPP
 
         const char* asciidata = reinterpret_cast<const char*>(data);
         data_ = std::string(asciidata);
-        if (data_.size() >= len)
+        if (data_.size() >= maxlen)
         {
-            data_ = std::string(asciidata, len - 1);
+            data_ = std::string(asciidata, maxlen - 1);
+        }
+
+        const unsigned char* toValidate = reinterpret_cast<const unsigned char*>(data_.c_str());
+        if (!validator_.IsValid(toValidate, data_.size() + 1))
+        {
+            std::stringstream s;
+            s << __PRETTY_FUNCTION__ << " " << this->Name() << " : " << maxlen;
+            s << " : Invalid data !";
+            throw std::invalid_argument(s.str());
         }
 
         data += (data_.size() + 1);
@@ -46,15 +55,9 @@ namespace SMPP
     }
 
     template <typename T>
-    size_t COctetString<T>::Size() const
+    value_t COctetString<T>::Size() const
     {
         return data_.size() + 1;
-    }
-
-    template <typename T>
-    bool COctetString<T>::IsValid() const
-    {
-        return (validator_.IsValid(this->Data(), this->Size()));
     }
 
     template <typename T>

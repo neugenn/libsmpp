@@ -61,7 +61,7 @@ namespace SMPP
     }
 
     template <typename T>
-    size_t Integer<T>::Size() const
+    value_t Integer<T>::Size() const
     {
         return sizeof(T);
     }

@@ -4,12 +4,11 @@
 #include "PduDataType.h"
 #include "CommandId.h"
 #include "CommandStatus.h"
+#include "PduHeader.h"
 #include <string>
 
 namespace SMPP
 {
-    class PduHeader;
-
     class Pdu : public PduDataType
     {
     public:
@@ -21,13 +20,11 @@ namespace SMPP
         Pdu();
 
         /*!
-         * \brief Creates a Pdu object from a stream of bytes
+         * \brief Creates a Pdu object with a specific header
          * \param data
-         * \throw std::invalid_argument The data buffer is NULL
          */
-        Pdu(const unsigned char* data);
-        Pdu(const Pdu& rsh);
-        Pdu& operator=(const Pdu& rsh);
+        Pdu(const PduHeader& h);
+
         virtual ~Pdu();
 
         value_t CommandLength() const;
@@ -47,38 +44,36 @@ namespace SMPP
 
         SMPP::CommandStatus GetCommandError() const;
 
-        /*!
-         * @brief Prepares the formatted content of the PDU
-         * @param[out] s The content of the PDU
-         */
-        virtual void GetFormattedContent(std::string& s) const;
 
         /*!
          * @brief The minimum size of the PDU
          */
-        virtual size_t MinSize() const = 0;
+        value_t MinSize() const;
 
         /*!
          * @brief The maximum size of the PDU
          */
-        virtual size_t MaxSize() const = 0;
+        value_t MaxSize() const;
 
         bool IsValid() const;
 
     protected:
+        virtual void GetFormattedContent(std::string& s) const;
         void UpdateCommandLength();
 
     private:
+        virtual value_t GetMinSize() const = 0;
+        virtual value_t GetMaxSize() const = 0;
         bool IsValidHeader() const;
         virtual bool IsValidBody() const;
 
     protected:
-        PduHeader* header_;
+        PduHeader header_;
+        friend std::ostream& operator<<(std::ostream& s, const SMPP::Pdu& pdu);
     };
-}
 
-std::ostream& operator<<(std::ostream& s, const SMPP::Pdu& pdu);
-bool operator==(const SMPP::Pdu& lsh, const SMPP::Pdu& rsh);
-bool operator!=(const SMPP::Pdu& lsh, const SMPP::Pdu& rsh);
+    bool operator==(const SMPP::Pdu& lsh, const SMPP::Pdu& rsh);
+    bool operator!=(const SMPP::Pdu& lsh, const SMPP::Pdu& rsh);
+}
 
 #endif // PDU_H

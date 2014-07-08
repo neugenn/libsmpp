@@ -35,7 +35,7 @@ namespace SMPP
         /*!
          * @brief The size of the underlying storage buffer
          */
-        virtual size_t Size() const = 0;
+        virtual value_t Size() const = 0;
 
     private:
         std::string name_;

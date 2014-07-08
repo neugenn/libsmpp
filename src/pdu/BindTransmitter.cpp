@@ -5,15 +5,15 @@
 
 namespace SMPP
 {
-    const size_t BindTransmitter::SystemIdMaxLen = 16; //bytes
-    const size_t BindTransmitter::PasswordMaxLen = 9; //bytes
-    const size_t BindTransmitter::SystemTypeMaxLen = 13; //bytes
-    const size_t BindTransmitter::AddressRangeMaxLen = 41; //bytes
+    const value_t BindTransmitter::SYSTEM_ID_MAX_LEN = 16; //bytes
+    const value_t BindTransmitter::PASSWORD_MAX_LEN = 9; //bytes
+    const value_t BindTransmitter::SYSTEM_TYPE_MAX_LEN = 13; //bytes
+    const value_t BindTransmitter::ADDRESS_RANGE_MAX_LEN = 41; //bytes
 
-    class BindTransmitter::BindTransmitterPrivate
+    class BindTransmitter::BindTransmitterBody
     {
     public:
-        BindTransmitterPrivate() :
+        BindTransmitterBody() :
         systemId_("system_id"),
         password_("password"),
         systemType_("system_type"),
@@ -24,7 +24,7 @@ namespace SMPP
         data_(new unsigned char[MaxSize()])
         {}
 
-        BindTransmitterPrivate(const unsigned char* data) :
+        BindTransmitterBody(const unsigned char* data) :
         systemId_("system_id"),
         password_("password"),
         systemType_("system_type"),
@@ -34,16 +34,16 @@ namespace SMPP
         addressRange_("address_range"),
         data_(new unsigned char[MaxSize()])
         {
-            systemId_ = CString(data, SystemIdMaxLen, "system_id");
-            password_ = CString(data, PasswordMaxLen, "password");
-            systemType_ = CString(data, SystemTypeMaxLen, "system_type");
+            systemId_ = CString(data, SYSTEM_ID_MAX_LEN, "system_id");
+            password_ = CString(data, PASSWORD_MAX_LEN, "password");
+            systemType_ = CString(data, SYSTEM_TYPE_MAX_LEN, "system_type");
             interfaceVersion_ = OneByteInteger(data, "interface_version");
             addrTon_ = OneByteInteger(data, "addr_ton");
             addrNpi_ = OneByteInteger(data, "addr_npi");
-            addressRange_ = CString(data, AddressRangeMaxLen, "address_range");
+            addressRange_ = CString(data, ADDRESS_RANGE_MAX_LEN, "address_range");
         }
 
-        BindTransmitterPrivate(const BindTransmitterPrivate& rsh) :
+        BindTransmitterBody(const BindTransmitterBody& rsh) :
         systemId_(rsh.systemId_),
         password_(rsh.password_),
         systemType_(rsh.systemType_),
@@ -54,7 +54,7 @@ namespace SMPP
         data_(new unsigned char[MaxSize()])
         {}
 
-        BindTransmitterPrivate& operator=(const BindTransmitterPrivate& rsh)
+        BindTransmitterBody& operator=(const BindTransmitterBody& rsh)
         {
             if (this != &rsh)
             {
@@ -71,7 +71,7 @@ namespace SMPP
             return *this;
         }
 
-        ~BindTransmitterPrivate()
+        ~BindTransmitterBody()
         {
             if (NULL != data_)
             {
@@ -79,18 +79,18 @@ namespace SMPP
             }
         }
 
-        static size_t MinSize()
+        static value_t MinSize()
         {
             return PduHeader().Size() + 4 * CString().Size() + 3 * OneByteInteger().Size();
         }
 
-        static size_t MaxSize()
+        static value_t MaxSize()
         {
-            return PduHeader().Size() + BindTransmitter::SystemIdMaxLen + BindTransmitter::PasswordMaxLen + \
-            BindTransmitter::SystemTypeMaxLen + BindTransmitter::AddressRangeMaxLen + 3 * OneByteInteger().Size();
+            return PduHeader().Size() + BindTransmitter::SYSTEM_ID_MAX_LEN + BindTransmitter::PASSWORD_MAX_LEN + \
+            BindTransmitter::SYSTEM_TYPE_MAX_LEN + BindTransmitter::ADDRESS_RANGE_MAX_LEN + 3 * OneByteInteger().Size();
         }
 
-        size_t Size() const
+        value_t Size() const
         {
                 return systemId_.Size() + password_.Size() + systemType_.Size() \
                 + interfaceVersion_.Size() + addrTon_.Size() + addrNpi_.Size() + addressRange_.Size();
@@ -115,25 +115,33 @@ namespace SMPP
 
     BindTransmitter::BindTransmitter() :
     Pdu(),
-    impl_(new BindTransmitterPrivate())
+    impl_(new BindTransmitterBody)
     {
-        header_->SetCommandId(SMPP::BIND_TRANSMITTER);
-        header_->SetCommandLength(BindTransmitterPrivate::MinSize());
+        header_.SetCommandId(SMPP::BIND_TRANSMITTER);
+        header_.SetCommandLength(BindTransmitterBody::MinSize());
     }
 
-    BindTransmitter::BindTransmitter(const unsigned char* data, size_t len) :
-    Pdu(data),
+    BindTransmitter::BindTransmitter(const PduHeader& h, const unsigned char* body) :
+    Pdu(h),
     impl_(NULL)
     {
-        if (len < BindTransmitterPrivate::MinSize())
+        const value_t commandLen = header_.CommandLength();
+        if (commandLen < BindTransmitterBody::MinSize())
         {
             std::stringstream s;
-            s << __PRETTY_FUNCTION__ << " : The size of the data buffer(" << len << ") ";
-            s << "is smaller than the minimum allowed PDU size(" << BindTransmitterPrivate::MinSize() <<") !";
+            s << __PRETTY_FUNCTION__ << " : The command_len(" << commandLen << ") ";
+            s << "is smaller than the minimum allowed PDU size(" << BindTransmitterBody::MinSize() <<") !";
             throw std::invalid_argument(s.str());
         }
 
-        impl_ = new BindTransmitterPrivate(data);
+        if (BIND_TRANSMITTER != header_.CommandId())
+        {
+            std::stringstream s;
+            s << __PRETTY_FUNCTION__ << " : Invalid command_id for BindTransmitter PDU ! (" << header_.CommandId() << ") ";
+            throw std::invalid_argument(s.str());
+        }
+
+        impl_ = new BindTransmitterBody(body);
     }
 
     BindTransmitter::~BindTransmitter()
@@ -144,16 +152,9 @@ namespace SMPP
         }
     }
 
-    BindTransmitter::BindTransmitter(const PduHeader& rsh) : Pdu(),
-    impl_(new BindTransmitterPrivate)
-    {
-        *header_ = rsh;
-        header_->SetCommandLength(BindTransmitterPrivate::MinSize());
-    }
-
     BindTransmitter::BindTransmitter(const BindTransmitter &rsh) :
     Pdu(rsh),
-    impl_(new BindTransmitterPrivate(*(rsh.impl_)))
+    impl_(new BindTransmitterBody(*(rsh.impl_)))
     {
     }
 
@@ -187,22 +188,22 @@ namespace SMPP
         s = str.str();
     }
 
-    size_t BindTransmitter::MinSize() const
+    value_t BindTransmitter::GetMinSize() const
     {
-        return BindTransmitterPrivate::MinSize();
+        return BindTransmitterBody::MinSize();
     }
 
-    size_t BindTransmitter::MaxSize() const
+    value_t BindTransmitter::GetMaxSize() const
     {
-        return BindTransmitterPrivate::MaxSize();
+        return BindTransmitterBody::MaxSize();
     }
 
     unsigned const char* BindTransmitter::Data() const
     {
         unsigned char* buf = impl_->Data();
 
-        memcpy(buf, header_->Data(), header_->Size());
-        size_t offset = header_->Size();
+        memcpy(buf, header_.Data(), header_.Size());
+        size_t offset = header_.Size();
 
         memcpy(buf + offset, impl_->systemId_.Data(), impl_->systemId_.Size());
         offset += impl_->systemId_.Size();
@@ -227,9 +228,9 @@ namespace SMPP
         return buf;
     }
 
-    size_t BindTransmitter::Size() const
+    value_t BindTransmitter::Size() const
     {
-        return header_->Size() + impl_->Size();
+        return header_.Size() + impl_->Size();
     }
 
     bool BindTransmitter::IsValidHeader() const

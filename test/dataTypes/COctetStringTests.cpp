@@ -15,7 +15,7 @@ public:
     TestingValidation()
     {}
 
-    virtual bool IsValid(const unsigned char* /*data*/, size_t /*size*/) const
+    virtual bool IsValid(const unsigned char* /*data*/, SMPP::value_t /*size*/) const
     {
         return T;
     }
@@ -25,7 +25,7 @@ template <bool T>
 class TestingCOctetString : public SMPP::COctetString<TestingValidation<T> >
 {
 public:
-   TestingCOctetString(const unsigned char* data, size_t len) : SMPP::COctetString<TestingValidation<T> >(data, len)
+   TestingCOctetString(const unsigned char* data, SMPP::value_t len) : SMPP::COctetString<TestingValidation<T> >(data, len)
    {}
 };
 
@@ -79,14 +79,12 @@ void COctetStringTests::tearDown()
 
 void COctetStringTests::testValidityWithValidationFailure()
 {
-    TestingCOctetString<false> s(&COctetStringTests::AsciiData[0], 5);
-    CPPUNIT_ASSERT_EQUAL(false, s.IsValid());
+    CPPUNIT_ASSERT_THROW(new TestingCOctetString<false>(&COctetStringTests::AsciiData[0], 5), std::invalid_argument);
 }
 
 void COctetStringTests::testValidityWithValidationOk()
 {
-    TestingCOctetString<true> s(&COctetStringTests::AsciiData[0], 5);
-    CPPUNIT_ASSERT_EQUAL(true, s.IsValid());
+    CPPUNIT_ASSERT_NO_THROW(new TestingCOctetString<true>(&COctetStringTests::AsciiData[0], 5));
 }
 
 void COctetStringTests::testCreateWithNullDataBuffer()
@@ -107,7 +105,7 @@ void COctetStringTests::testCreateWithSpecificSize()
 void COctetStringTests::testEmptyStringSize()
 {
     SMPP::CString s;
-    CPPUNIT_ASSERT_EQUAL(size_t(1), s.Size());
+    CPPUNIT_ASSERT_EQUAL(SMPP::value_t(1), s.Size());
 }
 
 void COctetStringTests::testEmptyStringData()
@@ -127,7 +125,7 @@ void COctetStringTests::testFormattedData()
 
 void COctetStringTests::testSize()
 {
-    CPPUNIT_ASSERT_EQUAL(size_t(5), pString_->Size());
+    CPPUNIT_ASSERT_EQUAL(SMPP::value_t(5), pString_->Size());
 }
 
 #endif // COCTETSTRINGTESTS_H_

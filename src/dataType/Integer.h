@@ -42,7 +42,7 @@ namespace SMPP
          * @brief The size of the data buffer
          * @see Data
          */
-        virtual size_t Size() const;
+        virtual value_t Size() const;
 
         /*!
          * @brief Set the value of the integer object
@@ -64,6 +64,16 @@ namespace SMPP
      * @brief OneByteInteger Unsigned value containing 1 octet
      */
     typedef Integer<unsigned char> OneByteInteger;
+
+    /*!
+     * @brief OneByteInteger Unsigned value containing 2 octets
+     */
+    typedef Integer<uint16_t> TwoByteInteger;
+
+    /*!
+     * @brief OneByteInteger Unsigned value containing 4 octets
+     */
+    typedef Integer<uint32_t> FourByteInteger;
 }
 
 #endif // INTEGER_H_

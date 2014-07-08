@@ -27,21 +27,23 @@ namespace SMPP
          * @param data
          * @throw
          */
-        BindTransmitterResp(const unsigned char* data);
+        BindTransmitterResp(const PduHeader& h, const unsigned char* body);
         ~BindTransmitterResp();
 
         BindTransmitterResp(const BindTransmitterResp& rsh);
         BindTransmitterResp& operator=(const BindTransmitterResp& rsh);
 
-        virtual void GetFormattedContent(std::string &s) const;
-        virtual size_t MinSize() const;
-        virtual size_t MaxSize() const;
 
         virtual const unsigned char* Data() const;
-        virtual size_t Size() const;
+        virtual value_t Size() const;
 
         void SetSystemId(const std::string& id);
         const std::string& GetSystemId() const;
+
+    private:
+        virtual value_t GetMinSize() const;
+        virtual value_t GetMaxSize() const;
+        virtual void GetFormattedContent(std::string &s) const;
 
     private:
         CString systemId_;

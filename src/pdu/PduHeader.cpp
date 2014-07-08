@@ -57,12 +57,6 @@ namespace SMPP
         this->SetCommandStatus(SMPP::ESME_ROK);
     }
 
-    PduHeader::PduHeader(const unsigned char*& data) :
-    PduDataType(),
-    impl_(new PduHeaderPrivate(data))
-    {
-    }
-
     PduHeader::PduHeader(const PduHeader &rsh) :
     PduDataType(rsh),
     impl_(NULL)
@@ -132,24 +126,23 @@ namespace SMPP
         impl_->sequenceNum_.SetValue(val);
     }
 
-    void PduHeader::GetFormattedContent(std::string &res) const
-    {
-        std::stringstream s;
-        s << "command_len: 0x" << impl_->commandLen_ << " (" << impl_->commandLen_.Value() << ")" << std::endl;
-        s << "command_id: 0x" << impl_->commandId_ << std::endl;
-        s << "command_status: 0x" << impl_->commandStatus_ << std::endl;
-        s << "sequence_number: 0x" << impl_->sequenceNum_ << " (" << impl_->sequenceNum_.Value() << ")" << std::endl;
-
-        res = s.str();
-    }
-
     const unsigned char* PduHeader::Data() const
     {
         return impl_->Data();
     }
 
-    size_t PduHeader::Size() const
+    value_t PduHeader::Size() const
     {
         return PduHeaderPrivate::Size;
+    }
+
+    std::ostream& operator<<(std::ostream& s, const PduHeader& h)
+    {
+        s << "command_len: 0x" << h.impl_->commandLen_ << " (" << h.CommandLength() << ")" << std::endl;
+        s << "command_id: 0x" << h.impl_->commandId_ << std::endl;
+        s << "command_status: 0x" << h.impl_->commandStatus_ << std::endl;
+        s << "sequence_number: 0x" << h.impl_->sequenceNum_ << " (" << h.SequenceNumber() << ")" << std::endl;
+
+        return s;
     }
 }

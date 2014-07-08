@@ -62,7 +62,7 @@ namespace SMPP
         return data_;
     }
 
-    size_t OctetString::Size() const
+    value_t OctetString::Size() const
     {
         return maxSize_;
     }

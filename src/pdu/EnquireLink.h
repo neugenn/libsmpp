@@ -8,13 +8,15 @@ namespace SMPP
     class EnquireLink : public Pdu
     {
     public:
-        EnquireLink(const unsigned char* data);
+        EnquireLink();
+        EnquireLink(const PduHeader& h);
 
         virtual const unsigned char* Data() const;
-        virtual size_t Size() const;
+        virtual value_t Size() const;
 
-        virtual size_t MinSize() const;
-        virtual size_t MaxSize() const;
+    private:
+        virtual value_t GetMinSize() const;
+        virtual value_t GetMaxSize() const;
     };
 }
 

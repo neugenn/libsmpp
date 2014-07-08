@@ -30,11 +30,11 @@ namespace SMPP
         ~OctetString();
 
         virtual const unsigned char* Data() const;
-        virtual size_t Size() const;
+        virtual value_t Size() const;
 
     private:
         unsigned char* data_;
-        size_t maxSize_;
+        value_t maxSize_;
     };
 }
 

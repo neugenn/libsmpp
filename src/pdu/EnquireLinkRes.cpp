@@ -3,27 +3,29 @@
 
 namespace SMPP
 {
-    EnquireLinkRes::EnquireLinkRes(const unsigned char* data) : Pdu(data)
-    {
-    }
+    EnquireLinkRes::EnquireLinkRes() : Pdu()
+    {}
+
+    EnquireLinkRes::EnquireLinkRes(const PduHeader& h) : Pdu(h)
+    {}
 
     const unsigned char* EnquireLinkRes::Data() const
     {
-        return header_->Data();
+        return header_.Data();
     }
 
-    size_t EnquireLinkRes::Size() const
+    value_t EnquireLinkRes::Size() const
     {
-        return header_->Size();
+        return header_.Size();
     }
 
-    size_t EnquireLinkRes::MinSize() const
+    value_t EnquireLinkRes::GetMinSize() const
     {
         return this->Size();
     }
 
-    size_t EnquireLinkRes::MaxSize() const
+    value_t EnquireLinkRes::GetMaxSize() const
     {
-        return this->MinSize();
+        return this->GetMinSize();
     }
 }

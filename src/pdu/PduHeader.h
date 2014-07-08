@@ -21,8 +21,6 @@ namespace SMPP
          * \param[in] dataBuf The data buffer
          * \throw std::invalid_argument The data buffer is NULL
          */
-        PduHeader(const unsigned char*& data);
-
         PduHeader(const PduHeader& rsh);
 
         PduHeader& operator=(const PduHeader& rsh);
@@ -39,7 +37,7 @@ namespace SMPP
          * \brief Size
          * \return
          */
-        virtual size_t Size() const;
+        virtual value_t Size() const;
 
         value_t CommandLength() const;
         void SetCommandLength(value_t len);
@@ -53,11 +51,11 @@ namespace SMPP
         value_t SequenceNumber() const;
         void SetSequenceNumber(value_t value);
 
-        void GetFormattedContent(std::string& res) const;
-
     private:
         class PduHeaderPrivate;
         PduHeaderPrivate* impl_;
+
+        friend std::ostream& operator<<(std::ostream& s, const PduHeader& h);
     };
 }
 

@@ -11,25 +11,15 @@ namespace SMPP
     systemId_("system_id"),
     data_(NULL)
     {
-        header_->SetCommandId(SMPP::BIND_TRANSMITTER_RESP);
-        header_->SetCommandLength(MIN_SIZE);
+        header_.SetCommandId(SMPP::BIND_TRANSMITTER_RESP);
+        header_.SetCommandLength(MIN_SIZE);
     }
 
-    BindTransmitterResp::BindTransmitterResp(const unsigned char* data) :
-    Pdu(data),
-    systemId_(data, SystemIdMaxLen, "system_id"),
+    BindTransmitterResp::BindTransmitterResp(const PduHeader& h, const unsigned char* body) :
+    Pdu(h),
+    systemId_(body, SystemIdMaxLen, "system_id"),
     data_(NULL)
     {
-        try
-        {
-            header_->SetCommandLength(this->MinSize());
-        }
-        catch (std::exception& e)
-        {
-            std::stringstream s;
-            s << __PRETTY_FUNCTION__ << " " << e.what();
-            throw std::invalid_argument(s.str());
-        }
     }
 
     BindTransmitterResp::BindTransmitterResp(const BindTransmitterResp& rsh) :
@@ -71,14 +61,14 @@ namespace SMPP
         s = str.str();
     }
 
-    size_t BindTransmitterResp::MinSize() const
+    value_t BindTransmitterResp::GetMinSize() const
     {
         return MIN_SIZE;
     }
 
-    size_t BindTransmitterResp::MaxSize() const
+    value_t BindTransmitterResp::GetMaxSize() const
     {
-        return header_->Size() + SystemIdMaxLen;
+        return header_.Size() + SystemIdMaxLen;
     }
 
     const unsigned char* BindTransmitterResp::Data() const
@@ -91,16 +81,16 @@ namespace SMPP
         const size_t size = Size();
         unsigned char* buf = new unsigned char[size];
 
-        memcpy(buf, header_->Data(), header_->Size());
-        memcpy(buf + header_->Size(), systemId_.Data(), systemId_.Size());
+        memcpy(buf, header_.Data(), header_.Size());
+        memcpy(buf + header_.Size(), systemId_.Data(), systemId_.Size());
 
         data_ = buf;
         return data_;
     }
 
-    size_t BindTransmitterResp::Size() const
+    value_t BindTransmitterResp::Size() const
     {
-        const size_t size = header_->Size() + systemId_.Size();
+        const size_t size = header_.Size() + systemId_.Size();
         return size;
     }
 

@@ -14,22 +14,22 @@ namespace SMPP
         /*!
          * @brief The max lenght of the system_id, including the NULL terminating character
          */
-        static const size_t SystemIdMaxLen;
+        static const value_t SYSTEM_ID_MAX_LEN;
 
         /*!
          * @brief The max lenght of the password, including the NULL terminating character
          */
-        static const size_t PasswordMaxLen;
+        static const value_t PASSWORD_MAX_LEN;
 
         /*!
          * @brief The max lenght of the system_type, including the NULL terminating character
          */
-        static const size_t SystemTypeMaxLen;
+        static const value_t SYSTEM_TYPE_MAX_LEN;
 
         /*!
          * @brief The max lenght of the address_range, including the NULL terminating character
          */
-        static const size_t AddressRangeMaxLen;
+        static const value_t ADDRESS_RANGE_MAX_LEN;
 
         /*!
          * @brief Creates an empty BindTransmitter object
@@ -42,22 +42,12 @@ namespace SMPP
          * @param[in] len The length of the data buffer
          * @throw std::invalid_argument The data buffer is NULL
          */
-        BindTransmitter(const unsigned char* data, size_t len);
+        BindTransmitter(const PduHeader&h, const unsigned char* body);
 
         ~BindTransmitter();
 
         BindTransmitter(const BindTransmitter& rsh);
         BindTransmitter& operator=(const BindTransmitter& rhs);
-
-        /*!
-         * @brief Prepares the formatted content of the BIND_TRANSMITTER_PDU
-         * @param[out] s The content of the BIND_TRANSMITTER_PDU
-         */
-        virtual void GetFormattedContent(std::string &s) const;
-
-        virtual size_t MinSize() const;
-
-        virtual size_t MaxSize() const;
 
         /*!
          * @brief Data The data in host byte order
@@ -67,15 +57,17 @@ namespace SMPP
         /*!
          * @brief The size of the data buffer
          */
-        virtual size_t Size() const;
-
-    protected:
-        BindTransmitter(const PduHeader& h);
+        virtual value_t Size() const;
 
     private:
+        virtual value_t GetMinSize() const;
+        virtual value_t GetMaxSize() const;
+        virtual void GetFormattedContent(std::string &s) const;
         virtual bool IsValidHeader() const;
-        class BindTransmitterPrivate;
-        BindTransmitterPrivate* impl_;
+
+    private:
+        class BindTransmitterBody;
+        BindTransmitterBody* impl_;
     };
 }
 
