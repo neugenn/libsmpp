@@ -14,7 +14,10 @@ namespace SMPP
     {}
 
     Pdu::Pdu(const PduHeader& h) : header_(h)
-    {}
+    {
+        //TODO: make sure that the PDU properties are fulfilled
+        //new class required for validation
+    }
 
     Pdu::~Pdu()
     {}

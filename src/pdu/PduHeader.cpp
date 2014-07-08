@@ -22,7 +22,19 @@ namespace SMPP
         commandStatus_(data, "command_status"),
         sequenceNum_(data, "sequence_number"),
         data_()
-        {}
+        {
+            try
+            {
+                commandLen_ = SMPP::FourByteInteger(data, "command_len");
+                commandId_ = SMPP::FourByteInteger(data, "command_id");
+                commandStatus_ = SMPP::FourByteInteger(data, "command_status");
+                sequenceNum_ = SMPP::FourByteInteger(data, "sequence_number");
+            }
+            catch (...)
+            {
+                throw;
+            }
+        }
 
         unsigned const char* Data()
         {
@@ -61,8 +73,15 @@ namespace SMPP
     PduDataType(rsh),
     impl_(NULL)
     {
-        const unsigned char* pc = rsh.Data();
-        impl_ = new PduHeaderPrivate(pc);
+        try
+        {
+            const unsigned char* pc = rsh.Data();
+            impl_ = new PduHeaderPrivate(pc);
+        }
+        catch (...)
+        {
+            throw;
+        }
     }
 
     PduHeader& PduHeader::operator=(const PduHeader& rsh)

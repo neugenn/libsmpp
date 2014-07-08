@@ -25,22 +25,31 @@ namespace SMPP
         {}
 
         BindTransmitterBody(const unsigned char* data) :
-        systemId_("system_id"),
-        password_("password"),
-        systemType_("system_type"),
-        interfaceVersion_("interface_version"),
-        addrTon_("addr_ton"),
-        addrNpi_("addr_npi"),
-        addressRange_("address_range"),
-        data_(new unsigned char[MaxSize()])
+        systemId_(),
+        password_(),
+        systemType_(),
+        interfaceVersion_(),
+        addrTon_(),
+        addrNpi_(),
+        addressRange_(),
+        data_(NULL)
         {
-            systemId_ = CString(data, SYSTEM_ID_MAX_LEN, "system_id");
-            password_ = CString(data, PASSWORD_MAX_LEN, "password");
-            systemType_ = CString(data, SYSTEM_TYPE_MAX_LEN, "system_type");
-            interfaceVersion_ = OneByteInteger(data, "interface_version");
-            addrTon_ = OneByteInteger(data, "addr_ton");
-            addrNpi_ = OneByteInteger(data, "addr_npi");
-            addressRange_ = CString(data, ADDRESS_RANGE_MAX_LEN, "address_range");
+            try
+            {
+                systemId_ = CString(data, SYSTEM_ID_MAX_LEN, "system_id");
+                password_ = CString(data, PASSWORD_MAX_LEN, "password");
+                systemType_ = CString(data, SYSTEM_TYPE_MAX_LEN, "system_type");
+                interfaceVersion_ = OneByteInteger(data, "interface_version");
+                addrTon_ = OneByteInteger(data, "addr_ton");
+                addrNpi_ = OneByteInteger(data, "addr_npi");
+                addressRange_ = CString(data, ADDRESS_RANGE_MAX_LEN, "address_range");
+            }
+            catch (...)
+            {
+                throw;
+            }
+
+            data_ = new unsigned char[MaxSize()];
         }
 
         BindTransmitterBody(const BindTransmitterBody& rsh) :
