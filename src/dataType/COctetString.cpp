@@ -67,7 +67,7 @@ namespace SMPP
     }
 
     template <typename T>
-    void COctetString<T>::SetValue(std::string &value)
+    void COctetString<T>::SetValue(const std::string &value)
     {
         data_ = value;
         validator_.IsValid(this->Data(), this->Size());

@@ -5,7 +5,9 @@
 #include "CommandId.h"
 #include "CommandStatus.h"
 #include "PduHeader.h"
+#include "DataBuffer.h"
 #include <string>
+#include <vector>
 
 namespace SMPP
 {
@@ -18,6 +20,7 @@ namespace SMPP
          * \brief Creates an empty Pdu object
          */
         Pdu();
+
 
         /*!
          * \brief Creates a Pdu object with a specific header
@@ -69,6 +72,8 @@ namespace SMPP
 
     protected:
         PduHeader header_;
+        std::vector<PduDataType*> parameters_;
+        mutable DataBuffer buffer_;
         friend std::ostream& operator<<(std::ostream& s, const SMPP::Pdu& pdu);
     };
 

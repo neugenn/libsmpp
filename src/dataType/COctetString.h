@@ -33,7 +33,7 @@ namespace SMPP
         virtual const unsigned char* Data() const;
         virtual value_t Size() const;
         const std::string& Value() const;
-        void SetValue(std::string& value);
+        void SetValue(const std::string& value);
 
     private:
         T validator_;

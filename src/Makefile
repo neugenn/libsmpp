@@ -1,7 +1,7 @@
 dataType_src = dataType
 pdu_src = pdu
 objects = PduDataType.o Integer.o OctetString.o COctetString.o AsciiValidation.o DecimalValidation.o \
-          HexValidation.o PduHeader.o Pdu.o BindTransmitter.o BindTransmitterResp.o EnquireLink.o EnquireLinkRes.o 
+          HexValidation.o PduHeader.o Pdu.o BindTransmitter.o BindTransmitterResp.o EnquireLink.o EnquireLinkRes.o BindReceiver.o DataBuffer.o
  
 CXXFLAGS += $(DEBUG) -c -Wall -fpic 
 VPATH = $(dataType_src):$(pdu_src)
@@ -51,6 +51,12 @@ EnquireLink.o: EnquireLink.cpp
 	$(CXX) $(CXXFLAGS) $^
 
 EnquireLinkRes.o: EnquireLinkRes.cpp
+	$(CXX) $(CXXFLAGS) $^
+
+BindReceiver.o: BindReceiver.cpp
+	$(CXX) $(CXXFLAGS) $^
+
+DataBuffer.o: DataBuffer.cpp
 	$(CXX) $(CXXFLAGS) $^
 
 clean:

@@ -6,6 +6,7 @@
 #include <sstream>
 #include <cstring>
 #include <stdexcept>
+#include <stdint.h>
 
 namespace SMPP
 {

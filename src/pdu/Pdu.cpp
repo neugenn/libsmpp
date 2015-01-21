@@ -10,8 +10,11 @@ namespace SMPP
         return 0x7FFFFFFF;
     }
 
-    Pdu::Pdu() : PduDataType(), header_()
-    {}
+    Pdu::Pdu() : PduDataType(), header_(), parameters_(), buffer_()
+    {
+        parameters_.push_back(&header_);
+    }
+
 
     Pdu::Pdu(const PduHeader& h) : header_(h)
     {
@@ -20,7 +23,8 @@ namespace SMPP
     }
 
     Pdu::~Pdu()
-    {}
+    {
+    }
 
     value_t Pdu::CommandLength() const
     {
