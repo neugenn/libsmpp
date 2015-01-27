@@ -2,6 +2,7 @@
 #define DATABUFFER_H
 
 #include <cstdlib>
+#include <cstring>
 
 namespace SMPP
 {
@@ -26,5 +27,7 @@ namespace SMPP
         size_t size_;
         unsigned char* data_;
     };
+
+    DataBuffer operator+(const DataBuffer& b1, const DataBuffer& b2);
 }
 #endif // DATABUFFER_H

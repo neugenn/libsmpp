@@ -1,10 +1,16 @@
 dataType_src = dataType
+optional_src = $(dataType_src)/optional
 pdu_src = pdu
-objects = PduDataType.o Integer.o OctetString.o COctetString.o AsciiValidation.o DecimalValidation.o \
+#objects = PduDataType.o Integer.o OctetString.o COctetString.o AsciiValidation.o DecimalValidation.o \
           HexValidation.o PduHeader.o Pdu.o BindTransmitter.o BindTransmitterResp.o EnquireLink.o EnquireLinkRes.o BindReceiver.o DataBuffer.o
  
+objects = PduDataType.o Integer.o OctetString.o COctetString.o AsciiValidation.o DecimalValidation.o \
+          HexValidation.o Pdu.o BindReceiver.o BindReceiverResp.o DataBuffer.o Parameters.o 
+#Tlv.o 
+#ScInterfaceVersion.o
+
 CXXFLAGS += $(DEBUG) -c -Wall -fpic 
-VPATH = $(dataType_src):$(pdu_src)
+VPATH = $(dataType_src):$(pdu_src):$(optional_src)
 
 include SmppLibMakefile
 
@@ -56,7 +62,21 @@ EnquireLinkRes.o: EnquireLinkRes.cpp
 BindReceiver.o: BindReceiver.cpp
 	$(CXX) $(CXXFLAGS) $^
 
+CXXFLAGS += -I$(optional_src)
+BindReceiverResp.o: BindReceiverResp.cpp
+	$(CXX) $(CXXFLAGS) $^
+
 DataBuffer.o: DataBuffer.cpp
+	$(CXX) $(CXXFLAGS) $^
+
+Parameters.o: Parameters.cpp
+	$(CXX) $(CXXFLAGS) $^
+
+CXXFLAGS += -I$(pdu_src)
+Tlv.o: Tlv.cpp
+	$(CXX) $(CXXFLAGS) $^
+
+ScInterfaceVersion.o: ScInterfaceVersion.cpp
 	$(CXX) $(CXXFLAGS) $^
 
 clean:

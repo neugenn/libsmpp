@@ -61,12 +61,12 @@ namespace SMPP
         s = str.str();
     }
 
-    value_t BindTransmitterResp::GetMinSize() const
+    value_t BindTransmitterResp::MinBodySize() const
     {
         return MIN_SIZE;
     }
 
-    value_t BindTransmitterResp::GetMaxSize() const
+    value_t BindTransmitterResp::MaxBodySize() const
     {
         return header_.Size() + SystemIdMaxLen;
     }

@@ -41,8 +41,8 @@ namespace SMPP
         const std::string& GetSystemId() const;
 
     private:
-        virtual value_t GetMinSize() const;
-        virtual value_t GetMaxSize() const;
+        virtual value_t MinBodySize() const;
+        virtual value_t MaxBodySize() const;
         virtual void GetFormattedContent(std::string &s) const;
 
     private:

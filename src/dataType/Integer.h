@@ -22,15 +22,7 @@ namespace SMPP
          /*!
          * @brief Creates an Integer object which is zero filled
          */
-        Integer(const char* name = "");
-
-        /*!
-         * @brief Creates an Integer object from a stream of bytes
-         * @param data Big Endian data buffer used as the value of the Integer object
-         * @throw std::invalid_argument Data buffer is NULL
-         */
-        Integer(const unsigned char*& data, const char* name = "");
-
+        Integer(const char* name = "",  uint32_t value = 0);
        ~Integer();
 
         /*!

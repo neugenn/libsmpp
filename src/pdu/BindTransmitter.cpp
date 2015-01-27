@@ -197,12 +197,12 @@ namespace SMPP
         s = str.str();
     }
 
-    value_t BindTransmitter::GetMinSize() const
+    value_t BindTransmitter::MinBodySize() const
     {
         return BindTransmitterBody::MinSize();
     }
 
-    value_t BindTransmitter::GetMaxSize() const
+    value_t BindTransmitter::MaxBodySize() const
     {
         return BindTransmitterBody::MaxSize();
     }

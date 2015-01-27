@@ -1,6 +1,7 @@
 #include "BindReceiver.h"
 #include "COctetString.h"
 #include "Integer.h"
+#include "Parameters.h"
 #include <cassert>
 
 namespace SMPP
@@ -10,32 +11,45 @@ namespace SMPP
     const value_t BindReceiver::SYSTEM_TYPE_MAX_LEN = 13; //bytes
     const value_t BindReceiver::ADDRESS_RANGE_MAX_LEN = 41; //bytes
 
-    class BindReceiver::BindReceiverBody : public PduDataType
+    class BindReceiver::BindReceiverBody
     {
     public:
-        BindReceiverBody() : PduDataType(),
+        BindReceiverBody() :
             systemId_("system_id"),
             password_("password"),
             systemType_("system_type"),
-            interfaceVersion_("interface_version"),
+            interfaceVersion_("interface_version", 0x22),
             addrTon_("addr_ton"),
             addrNpi_("addr_npi"),
             addressRange_("address_range")
-        {
-        }
+        {}
 
-        virtual const unsigned char* Data() const
-        {
-            assert(NULL != __PRETTY_FUNCTION__);
-            return NULL;
+        BindReceiverBody(const BindReceiverBody& rhs) :
+            systemId_(rhs.systemId_),
+            password_(rhs.password_),
+            systemType_(rhs.systemType_),
+            interfaceVersion_(rhs.interfaceVersion_),
+            addrTon_(rhs.addrTon_),
+            addrNpi_(rhs.addrNpi_),
+            addressRange_(rhs.addressRange_)
+        {}
 
-        }
-
-        virtual value_t Size() const
+        BindReceiverBody& operator=(const BindReceiverBody& rhs)
         {
-            return systemId_.Size() + password_.Size() \
-                + systemType_.Size() + interfaceVersion_.Size() \
-                + addrTon_.Size() + addrNpi_.Size() + addressRange_.Size();
+            if (this == &rhs)
+            {
+                return *this;
+            }
+
+            systemId_ = rhs.systemId_;
+            password_ = rhs.password_;
+            systemType_ = rhs.systemType_;
+            interfaceVersion_ = rhs.interfaceVersion_;
+            addrTon_ = rhs.addrTon_;
+            addrNpi_ = rhs.addrNpi_;
+            addressRange_ = rhs.addressRange_;
+
+            return *this;
         }
 
         CString systemId_;
@@ -47,15 +61,61 @@ namespace SMPP
         CString addressRange_;
     };
 
-    BindReceiver::BindReceiver() : Pdu(), body_(NULL)
+    BindReceiver::BindReceiver() : Pdu("BIND_RECEIVER"), body_(NULL)
     {
-        header_.SetCommandId(SMPP::BIND_RECEIVER);
-        header_.SetCommandLength(GetMinSize());
-
         body_ = new BindReceiverBody;
-        parameters_.push_back(body_);
+        SetCommandId(SMPP::BIND_RECEIVER);
 
-        buffer_.Alloc(GetMaxSize());
+        parameters_->Add(body_->systemId_);
+        parameters_->Add(body_->password_);
+        parameters_->Add(body_->systemType_);
+        parameters_->Add(body_->interfaceVersion_);
+        parameters_->Add(body_->addrTon_);
+        parameters_->Add(body_->addrNpi_);
+        parameters_->Add(body_->addressRange_);
+    }
+
+    BindReceiver::BindReceiver(const BindReceiver &rhs) : Pdu(rhs), body_(NULL)
+    {
+        body_ = new BindReceiverBody(*(rhs.body_));
+
+        parameters_->Add(body_->systemId_);
+        parameters_->Add(body_->password_);
+        parameters_->Add(body_->systemType_);
+        parameters_->Add(body_->interfaceVersion_);
+        parameters_->Add(body_->addrTon_);
+        parameters_->Add(body_->addrNpi_);
+        parameters_->Add(body_->addressRange_);
+    }
+
+    BindReceiver& BindReceiver::operator=(const BindReceiver &rhs)
+    {
+        if (this == &rhs)
+        {
+            return *this;
+        }
+
+        Pdu::operator =(rhs);
+        *body_ = *(rhs.body_);
+
+        parameters_->Add(body_->systemId_);
+        parameters_->Add(body_->password_);
+        parameters_->Add(body_->systemType_);
+        parameters_->Add(body_->interfaceVersion_);
+        parameters_->Add(body_->addrTon_);
+        parameters_->Add(body_->addrNpi_);
+        parameters_->Add(body_->addressRange_);
+
+        return *this;
+    }
+
+    BindReceiver::~BindReceiver()
+    {
+        if (NULL != body_)
+        {
+            delete body_;
+            body_ = NULL;
+        }
     }
 
     const std::string &BindReceiver::SystemId() const
@@ -105,8 +165,7 @@ namespace SMPP
 
     uint32_t BindReceiver::InterfaceVersion() const
     {
-        static uint32_t Version(0x22); //3.4
-        return Version;
+        return body_->interfaceVersion_.Value();
     }
 
     uint8_t BindReceiver::AddrTon() const
@@ -124,66 +183,14 @@ namespace SMPP
         return body_->addressRange_.Value().c_str();
     }
 
-    const unsigned char* BindReceiver::Data() const
+    value_t BindReceiver::MinBodySize() const
     {
-        unsigned char* data = buffer_.Data();
-        memcpy(data, header_.Data(), header_.Size());
-        size_t offset = header_.Size();
-
-        memcpy(data + offset, body_->systemId_.Data(), body_->systemId_.Size());
-        offset += body_->systemId_.Size();
-
-        memcpy(data + offset, body_->password_.Data(), body_->password_.Size());
-        offset += body_->password_.Size();
-
-        memcpy(data + offset, body_->systemType_.Data(), body_->systemType_.Size());
-        offset += body_->systemType_.Size();
-
-        memcpy(data + offset, body_->interfaceVersion_.Data(), body_->interfaceVersion_.Size());
-        offset += body_->interfaceVersion_.Size();
-
-        memcpy(data + offset, body_->addrTon_.Data(), body_->addrTon_.Size());
-        offset += body_->addrTon_.Size();
-
-        memcpy(data + offset, body_->addrNpi_.Data(), body_->addrNpi_.Size());
-        offset += body_->addrNpi_.Size();
-
-        memcpy(data + offset, body_->addressRange_.Data(), body_->addressRange_.Size());
-
-        return data;
+        return 4 * CString().Size() + 3 * OneByteInteger().Size();
     }
 
-    value_t BindReceiver::Size() const
+    value_t BindReceiver::MaxBodySize() const
     {
-        return header_.Size() + body_->Size();
-    }
-
-    value_t BindReceiver::GetMinSize() const
-    {
-        return PduHeader().Size() + 4 * CString().Size() + 3 * OneByteInteger().Size();
-    }
-
-    value_t BindReceiver::GetMaxSize() const
-    {
-        return PduHeader().Size() + SYSTEM_ID_MAX_LEN + PASSWORD_MAX_LEN + SYSTEM_TYPE_MAX_LEN + \
+        return SYSTEM_ID_MAX_LEN + PASSWORD_MAX_LEN + SYSTEM_TYPE_MAX_LEN + \
                 3 * OneByteInteger().Size() + ADDRESS_RANGE_MAX_LEN;
-    }
-
-    void BindReceiver::GetFormattedContent(std::string &s) const
-    {
-        s.clear();
-        Pdu::GetFormattedContent(s);
-
-        std::stringstream str;
-        str << s;
-        str << body_->systemId_.Name() << " : " << body_->systemId_ << " (" << body_->systemId_.Value() << ")" << std::endl;
-        str << body_->password_.Name() << " : " << body_->password_ << " (" << body_->password_.Value() << ")" << std::endl;
-        str << body_->systemType_.Name() << " : " << body_->systemType_ << " (" << body_->systemType_.Value() << ")" << std::endl;
-        str << body_->interfaceVersion_.Name() << " : " << body_->interfaceVersion_ << " (" << InterfaceVersion() << ")" << std::endl;
-        str << body_->addrTon_.Name() << " : " << body_->addrTon_ << " (" << body_->addrTon_.Value() << ")" << std::endl;
-        str << body_->addrNpi_.Name() << " : " << body_->addrNpi_ << " (" << body_->addrNpi_.Value() << ")" << std::endl;
-        str << body_->addressRange_.Name() << " : " << body_->addressRange_ << " (" << body_->addressRange_.Value() << ")" << std::endl;
-
-        s = str.str();
     }
 }

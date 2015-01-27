@@ -21,13 +21,22 @@ namespace SMPP
     std::ostream& operator<<(std::ostream& s, const PduDataType& data)
     {
         const unsigned char* buf = data.Data();
+        if (NULL == buf)
+        {
+            return s;
+        }
+
         const std::ios::fmtflags oldFlags = s.flags();
+        s << data.Name() << " : 0x";
+
         for (size_t i = 0; i < data.Size(); ++i)
         {
             s << std::setfill('0') << std::setw(2) << std::uppercase << std::hex;
             s << static_cast<unsigned int>(buf[i]);
         }
+
         s.setf(oldFlags);
+        s << " ( " << data.Size() << " byte(s) )" << std::endl;
 
         return s;
     }

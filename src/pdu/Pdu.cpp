@@ -1,54 +1,130 @@
 #include "Pdu.h"
+#include "Integer.h"
 #include "PduHeader.h"
-#include <string.h>
+#include "DataBuffer.h"
+#include "Parameters.h"
+#include <arpa/inet.h>
 #include <stdexcept>
+#include <iostream>
+#include <cassert>
 
 namespace SMPP
 {
+    class Pdu::PduPrivate
+    {
+    public:
+        static const size_t HEADER_SIZE;
+
+        PduPrivate() :
+            commandLen_("command_len"),
+            commandId_("command_id"),
+            commandStatus_("command_status"),
+            sequenceNum_("sequence_number")
+        {
+        }
+
+        PduPrivate(const PduPrivate& rhs) :
+            commandLen_(rhs.commandLen_),
+            commandId_(rhs.commandId_),
+            commandStatus_(rhs.commandStatus_),
+            sequenceNum_(rhs.sequenceNum_)
+        {
+        }
+
+        PduPrivate& operator=(const PduPrivate& rhs)
+        {
+            if (this == &rhs)
+            {
+                return *this;
+            }
+
+            commandLen_ = rhs.commandLen_;
+            commandId_ = rhs.commandId_;
+            commandStatus_ = rhs.commandStatus_;
+            sequenceNum_ = rhs.sequenceNum_;
+
+            return *this;
+        }
+
+        SMPP::FourByteInteger commandLen_;
+        SMPP::FourByteInteger commandId_;
+        SMPP::FourByteInteger commandStatus_;
+        SMPP::FourByteInteger sequenceNum_;
+    };
+
+    const size_t Pdu::PduPrivate::HEADER_SIZE = 16; //bytes
+
     value_t Pdu::MaxSequenceNumber()
     {
         return 0x7FFFFFFF;
     }
 
-    Pdu::Pdu() : PduDataType(), header_(), parameters_(), buffer_()
+    Pdu::Pdu() : PduDataType(), impl_(NULL), parameters_(NULL)
     {
-        parameters_.push_back(&header_);
+        impl_ = new PduPrivate;
+        parameters_ = new Parameters;
+        Update();
     }
 
-
-    Pdu::Pdu(const PduHeader& h) : header_(h)
+    Pdu::Pdu(const Pdu &rhs) : PduDataType(rhs), impl_(NULL), parameters_(NULL)
     {
-        //TODO: make sure that the PDU properties are fulfilled
-        //new class required for validation
+        impl_ = new PduPrivate(*(rhs.impl_));
+        parameters_ = new Parameters;
+        Update();
+    }
+
+    Pdu& Pdu::operator =(const Pdu& rhs)
+    {
+        if (this == &rhs)
+        {
+            return *this;
+        }
+
+        PduDataType::operator=(rhs);
+        *impl_ = *(rhs.impl_);
+        Update();
+
+        return *this;
     }
 
     Pdu::~Pdu()
     {
+        if (NULL != parameters_)
+        {
+            delete parameters_;
+            parameters_ = NULL;
+        }
+
+        if (NULL != impl_)
+        {
+            delete impl_;
+        }
     }
 
     value_t Pdu::CommandLength() const
     {
-        return header_.CommandLength();
+        impl_->commandLen_.SetValue(Size());
+        return impl_->commandLen_.Value();
     }
 
     SMPP::CommandId Pdu::CommandId() const
     {
-        return header_.CommandId();
+        return SMPP::CommandId(impl_->commandId_.Value());
     }
 
     SMPP::CommandStatus Pdu::CommandStatus() const
     {
-        return header_.CommandStatus();
+        return SMPP::CommandStatus(impl_->commandStatus_.Value());
     }
 
     void Pdu::SetCommandStatus(SMPP::CommandStatus status)
     {
-        return header_.SetCommandStatus(status);
+        impl_->commandStatus_.SetValue(status);
     }
 
     value_t Pdu::SequenceNumber() const
     {
-        return header_.SequenceNumber();
+        return impl_->sequenceNum_.Value();
     }
 
     void Pdu::SetSequenceNumber(value_t value)
@@ -58,75 +134,76 @@ namespace SMPP
             throw std::invalid_argument("Sequence number overflow !");
         }
 
-        header_.SetSequenceNumber(value);
+        impl_->sequenceNum_.SetValue(value);
     }
 
     value_t Pdu::MinSize() const
     {
-        return this->GetMinSize();
+        return PduPrivate::HEADER_SIZE + MinBodySize();
     }
 
     value_t Pdu::MaxSize() const
     {
-        return this->GetMaxSize();
+        return PduPrivate::HEADER_SIZE + MaxBodySize();
     }
 
-    void Pdu::UpdateCommandLength()
+    void Pdu::SetCommandId(SMPP::CommandId id)
     {
-        header_.SetCommandLength(this->Size());
+        impl_->commandId_.SetValue(id);
     }
 
-    bool Pdu::IsValid() const
+    void Pdu::Update()
     {
-        bool res = false;
-        do
-        {
-            if (!this->IsValidHeader())
-            {
-                break;
-            }
+        assert(NULL != parameters_);
 
-            const size_t pduSize = this->Size();
-            if (pduSize < this->MinSize())
-            {
-                break;
-            }
-
-            if (pduSize > this->MaxSize())
-            {
-                break;
-            }
-
-            res = this->IsValidBody();
-        }
-        while (false);
-        return res;
+        parameters_->Clear();
+        parameters_->Add(impl_->commandLen_);
+        parameters_->Add(impl_->commandId_);
+        parameters_->Add(impl_->commandStatus_);
+        parameters_->Add(impl_->sequenceNum_);
     }
 
-    void Pdu::GetFormattedContent(std::string& s) const
+    const unsigned char* Pdu::Data() const
     {
-        std::stringstream ss;
-        ss << header_;
-        s = ss.str();
+        impl_->commandLen_.SetValue(Size());
+        return parameters_->Data();
     }
 
-    bool Pdu::IsValidHeader() const
+    void Pdu::SetData(const DataBuffer &data)
     {
-        return true;
+        uint32_t value(0);
+        unsigned char* buf = reinterpret_cast<unsigned char*>(&value);
+        memcpy(buf, data.Data(), 4);
+        impl_->commandLen_.SetValue(htonl(value));
+
+        memcpy(buf, data.Data() + 4, 4);
+        impl_->commandId_.SetValue(htonl(value));
+
+        memcpy(buf, data.Data() + 8, 4);
+        impl_->commandStatus_.SetValue(htonl(value));
+
+        memcpy(buf, data.Data() + 12, 4);
+        impl_->sequenceNum_.SetValue(htonl(value));
     }
 
-    bool Pdu::IsValidBody() const
+    value_t Pdu::Size() const
     {
-        return false;
+        return parameters_->Size();
+    }
+
+    Pdu::Pdu(const char *name) : PduDataType(name), impl_(NULL), parameters_(NULL)
+    {
+        impl_ = new PduPrivate;
+        parameters_ = new Parameters;
+        Update();
     }
 
     std::ostream& operator<<(std::ostream& s, const SMPP::Pdu& pdu)
     {
-        std::string data;
-        pdu.GetFormattedContent(data);
+        pdu.impl_->commandLen_.SetValue(pdu.Size());
 
-        s << data;
-
+        s << pdu.Name() << std::endl;
+        s << *pdu.parameters_;
         return s;
     }
 

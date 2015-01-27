@@ -45,6 +45,7 @@ namespace SMPP
     std::ostream& operator<<(std::ostream& s, const PduDataType& data);
     bool operator==(const PduDataType& lsh, const PduDataType& rsh);
     bool operator!=(const PduDataType& lsh, const PduDataType& rsh);
-}
+
+    }
 
 #endif // PDUDATATYPE_H_

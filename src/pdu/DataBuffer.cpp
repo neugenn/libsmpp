@@ -75,4 +75,15 @@ namespace SMPP
     {
         bzero(data_, size_);
     }
+
+    DataBuffer operator+(const DataBuffer& b1, const DataBuffer& b2)
+    {
+        DataBuffer res(b1.Size() + b2.Size());
+
+        unsigned char* data = res.Data();
+        memcpy(data, b1.Data(), b1.Size());
+        memcpy(data + b1.Size(), b2.Data(), b2.Size());
+
+        return res;
+    }
 }

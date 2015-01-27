@@ -15,6 +15,9 @@ namespace SMPP
         static const value_t ADDRESS_RANGE_MAX_LEN;
 
         BindReceiver();
+        BindReceiver(const BindReceiver& rhs);
+        BindReceiver& operator=(const BindReceiver& rhs);
+        ~BindReceiver();
 
         const std::string& SystemId() const;
         void SetSystemId(const std::string& system_id);
@@ -29,16 +32,11 @@ namespace SMPP
         uint8_t AddrTon() const;
         uint8_t AddrNpi() const;
         const char* AddressRange() const;
-        virtual const unsigned char* Data() const;
-        virtual value_t Size() const;
-
 
     private:
-        virtual value_t GetMinSize() const;
-        virtual value_t GetMaxSize() const;
-        virtual void GetFormattedContent(std::string& s) const;
+        virtual value_t MinBodySize() const;
+        virtual value_t MaxBodySize() const;
 
-    private:
         class BindReceiverBody;
         BindReceiverBody* body_;
     };

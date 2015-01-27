@@ -1,11 +1,19 @@
 #include "Integer.h"
 #include <arpa/inet.h>
 #include <limits>
+#include <cassert>
 
 namespace SMPP
 {
     template <typename T>
     T SwapBytes(T val)
+    {
+        assert(NULL != "Not implemented !");
+        return val;
+    }
+
+    template<>
+    uint8_t SwapBytes(uint8_t val)
     {
         return val;
     }
@@ -29,26 +37,10 @@ namespace SMPP
     }
 
     template <typename T>
-    Integer<T>::Integer(const unsigned char*& data, const char* name) : PduDataType(name)
-    {
-        if (NULL == data)
-        {
-            std::stringstream s;
-            s << __PRETTY_FUNCTION__ << " " << Name();
-            s << " : NULL data buffer !";
-            throw std::invalid_argument(s.str());
-        }
-
-        bzero(&data_[0], sizeof(T));
-        memcpy(&data_[0], data, sizeof(T));
-
-        data += sizeof(T);
-    }
-
-    template <typename T>
-    Integer<T>::Integer(const char* name) : PduDataType(name)
+    Integer<T>::Integer(const char* name, uint32_t value /* = 0*/) : PduDataType(name)
     {
         bzero(&data_[0], sizeof(T));
+        SetValue(value);
     }
 
     template <typename T>

@@ -4,38 +4,26 @@
 #include "PduDataType.h"
 #include "CommandId.h"
 #include "CommandStatus.h"
-#include "PduHeader.h"
 #include "DataBuffer.h"
-#include <string>
-#include <vector>
 
 namespace SMPP
 {
+    class Parameters;
+
     class Pdu : public PduDataType
     {
     public:
         static value_t MaxSequenceNumber();
 
-        /*!
-         * \brief Creates an empty Pdu object
-         */
         Pdu();
-
-
-        /*!
-         * \brief Creates a Pdu object with a specific header
-         * \param data
-         */
-        Pdu(const PduHeader& h);
-
+        Pdu(const Pdu& rhs);
+        Pdu& operator=(const Pdu& rhs);
         virtual ~Pdu();
 
         value_t CommandLength() const;
         SMPP::CommandId CommandId() const;
-
         SMPP::CommandStatus CommandStatus() const;
         void SetCommandStatus(SMPP::CommandStatus status);
-
         value_t SequenceNumber() const;
 
         /*!
@@ -44,9 +32,6 @@ namespace SMPP
          * \throw std::invalid_argument The value exeeds the maximum allowed value
          */
         void SetSequenceNumber(value_t value);
-
-        SMPP::CommandStatus GetCommandError() const;
-
 
         /*!
          * @brief The minimum size of the PDU
@@ -58,22 +43,27 @@ namespace SMPP
          */
         value_t MaxSize() const;
 
-        bool IsValid() const;
+        virtual value_t Size() const;
+
+        virtual const unsigned char* Data() const;
+
+        virtual void SetData(const DataBuffer& data);
 
     protected:
-        virtual void GetFormattedContent(std::string& s) const;
-        void UpdateCommandLength();
+        Pdu(const char* name);
+        void SetCommandId(SMPP::CommandId id);
 
     private:
-        virtual value_t GetMinSize() const = 0;
-        virtual value_t GetMaxSize() const = 0;
-        bool IsValidHeader() const;
-        virtual bool IsValidBody() const;
+        virtual value_t MinBodySize() const = 0;
+        virtual value_t MaxBodySize() const = 0;
+        void Update();
+
+        class PduPrivate;
+        PduPrivate* impl_;
 
     protected:
-        PduHeader header_;
-        std::vector<PduDataType*> parameters_;
-        mutable DataBuffer buffer_;
+        Parameters* parameters_;
+
         friend std::ostream& operator<<(std::ostream& s, const SMPP::Pdu& pdu);
     };
 

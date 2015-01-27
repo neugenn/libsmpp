@@ -19,13 +19,13 @@ namespace SMPP
         return header_.Size();
     }
 
-    value_t EnquireLinkRes::GetMinSize() const
+    value_t EnquireLinkRes::MinBodySize() const
     {
         return this->Size();
     }
 
-    value_t EnquireLinkRes::GetMaxSize() const
+    value_t EnquireLinkRes::MaxBodySize() const
     {
-        return this->GetMinSize();
+        return this->MinBodySize();
     }
 }
