@@ -17,6 +17,7 @@ namespace SMPP
     public:
         virtual bool IsValid(const unsigned char* data, value_t size) const = 0;
     };
+
 }
 
 #endif // VALIDATION_H

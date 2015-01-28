@@ -12,39 +12,6 @@ namespace SMPP
     }
 
     template <typename T>
-    COctetString<T>::COctetString(const unsigned char*& data, size_t maxlen, const char* name) :
-    PduDataType(name),
-    validator_(T()),
-    data_()
-    {
-        if (NULL == data)
-        {
-            std::stringstream s;
-            s << __PRETTY_FUNCTION__ << " " << this->Name();
-            s << " : NULL data buffer !";
-            throw std::invalid_argument(s.str());
-        }
-
-        const char* asciidata = reinterpret_cast<const char*>(data);
-        data_ = std::string(asciidata);
-        if (data_.size() >= maxlen)
-        {
-            data_ = std::string(asciidata, maxlen - 1);
-        }
-
-        const unsigned char* toValidate = reinterpret_cast<const unsigned char*>(data_.c_str());
-        if (!validator_.IsValid(toValidate, data_.size() + 1))
-        {
-            std::stringstream s;
-            s << __PRETTY_FUNCTION__ << " " << this->Name() << " : " << maxlen;
-            s << " : Invalid data !";
-            throw std::invalid_argument(s.str());
-        }
-
-        data += (data_.size() + 1);
-    }
-
-    template <typename T>
     COctetString<T>::~COctetString()
     {}
 
@@ -73,7 +40,39 @@ namespace SMPP
         validator_.IsValid(this->Data(), this->Size());
     }
 
+    /*
+    template <>
+    COctetString<DefaultValidation>::COctetString(const char *name) :
+        PduDataType(name),
+        validator_(),
+        data_()
+    {}
+
+    template<>
+    COctetString<DefaultValidation>::~COctetString()
+    {}
+
+    template <>
+    const unsigned char* COctetString<DefaultValidation>::Data() const
+    {
+        return data_.Data();
+    }
+
+    template <>
+    value_t COctetString<DefaultValidation>::Size() const
+    {
+        return data_.Size();
+    }
+
+    template<>
+    void COctetString<DefaultValidation>::SetValue(const DataBuffer& buf)
+    {
+        data_ = buf;
+    }
+    */
+
     template class COctetString<AsciiValidation>;
     template class COctetString<DecimalValidation>;
     template class COctetString<HexValidation>;
+    //template class COctetString<DefaultValidation>;
 }

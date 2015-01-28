@@ -6,10 +6,10 @@
 
 namespace SMPP
 {
-    const value_t BindReceiver::SYSTEM_ID_MAX_LEN = 16; //bytes
-    const value_t BindReceiver::PASSWORD_MAX_LEN = 9; //bytes
-    const value_t BindReceiver::SYSTEM_TYPE_MAX_LEN = 13; //bytes
-    const value_t BindReceiver::ADDRESS_RANGE_MAX_LEN = 41; //bytes
+    const value_t BindReceiver::SYSTEM_ID_MAX_LEN = 15; //bytes
+    const value_t BindReceiver::PASSWORD_MAX_LEN = 8; //bytes
+    const value_t BindReceiver::SYSTEM_TYPE_MAX_LEN = 12; //bytes
+    const value_t BindReceiver::ADDRESS_RANGE_MAX_LEN = 40; //bytes
 
     class BindReceiver::BindReceiverBody
     {
@@ -18,9 +18,9 @@ namespace SMPP
             systemId_("system_id"),
             password_("password"),
             systemType_("system_type"),
-            interfaceVersion_("interface_version", 0x22),
-            addrTon_("addr_ton"),
-            addrNpi_("addr_npi"),
+            interfaceVersion_("interface_version", 0x34),
+            addrTon_("addr_ton", TON_UNKNOWN),
+            addrNpi_("addr_npi", NPI_UNKNOWN),
             addressRange_("address_range")
         {}
 
@@ -168,14 +168,14 @@ namespace SMPP
         return body_->interfaceVersion_.Value();
     }
 
-    uint8_t BindReceiver::AddrTon() const
+    SMPP::TON_VALUE BindReceiver::AddrTon() const
     {
-        return body_->addrTon_.Value();
+        return static_cast<TON_VALUE>(body_->addrTon_.Value());
     }
 
-    uint8_t BindReceiver::AddrNpi() const
+    NPI BindReceiver::AddrNpi() const
     {
-        return body_->addrNpi_.Value();
+        return static_cast<NPI>(body_->addrNpi_.Value());
     }
 
     const char* BindReceiver::AddressRange() const
@@ -191,6 +191,6 @@ namespace SMPP
     value_t BindReceiver::MaxBodySize() const
     {
         return SYSTEM_ID_MAX_LEN + PASSWORD_MAX_LEN + SYSTEM_TYPE_MAX_LEN + \
-                3 * OneByteInteger().Size() + ADDRESS_RANGE_MAX_LEN;
+                3 * OneByteInteger().Size() + ADDRESS_RANGE_MAX_LEN + 4;
     }
 }

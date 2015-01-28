@@ -5,7 +5,8 @@ pdu_src = pdu
           HexValidation.o PduHeader.o Pdu.o BindTransmitter.o BindTransmitterResp.o EnquireLink.o EnquireLinkRes.o BindReceiver.o DataBuffer.o
  
 objects = PduDataType.o Integer.o OctetString.o COctetString.o AsciiValidation.o DecimalValidation.o \
-          HexValidation.o Pdu.o BindReceiver.o BindReceiverResp.o DataBuffer.o Parameters.o 
+          HexValidation.o DefaultValidation.o ServiceType.o Pdu.o BindReceiver.o BindReceiverResp.o DataBuffer.o Parameters.o \
+	  DeliverSm.o DeliverSmResp.o
 #Tlv.o 
 #ScInterfaceVersion.o
 
@@ -18,6 +19,9 @@ all: $(SMPPLIB)
 
 $(SMPPLIB): $(objects)
 	$(CXX) $(DEBUG) -shared -o $@ $(objects)
+
+ServiceType.o: ServiceType.cpp
+	$(CXX) $(CXXFLAGS) $^
 
 PduDataType.o: PduDataType.cpp
 	$(CXX) $(CXXFLAGS) $^
@@ -38,6 +42,9 @@ DecimalValidation.o: DecimalValidation.cpp
 	$(CXX) $(CXXFLAGS) $^
 
 HexValidation.o: HexValidation.cpp
+	$(CXX) $(CXXFLAGS) $^
+
+DefaultValdation.o: DefaultValidation.cpp
 	$(CXX) $(CXXFLAGS) $^
 
 CXXFLAGS += -I$(dataType_src)
@@ -76,7 +83,10 @@ CXXFLAGS += -I$(pdu_src)
 Tlv.o: Tlv.cpp
 	$(CXX) $(CXXFLAGS) $^
 
-ScInterfaceVersion.o: ScInterfaceVersion.cpp
+DeliverSm.o: DeliverSm.cpp
+	$(CXX) $(CXXFLAGS) $^
+
+DeliverSmResp.o: DeliverSmResp.cpp
 	$(CXX) $(CXXFLAGS) $^
 
 clean:

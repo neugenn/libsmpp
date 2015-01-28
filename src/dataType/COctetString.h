@@ -3,6 +3,8 @@
 
 #include "PduDataType.h"
 #include "HexValidation.h"
+#include "DefaultValidation.h"
+#include "DataBuffer.h"
 #include <string>
 #include <stdexcept>
 
@@ -19,15 +21,6 @@ namespace SMPP
          * \brief COctetString Creates an empty string containing only the NULL character
          */
         COctetString(const char* name = "");
-
-        /*!
-         * @brief COctetString Creates a string object from a raw data buffer
-         * @param[in] data The data buffer
-         * @param[in] len The maximum length of the buffer (including the NULL terminating character)
-         * @throw std::invalid_argument The data buffer is NULL
-         */
-        COctetString(const unsigned char*& data, size_t maxlen, const char* name = "");
-
         ~COctetString();
 
         virtual const unsigned char* Data() const;
@@ -56,6 +49,39 @@ namespace SMPP
      * and terminated with the NULL character
      */
     typedef COctetString<HexValidation> CHexString;
+
+    template <>
+    class COctetString<DefaultValidation> : public PduDataType
+    {
+    public:
+        COctetString(const char* name = "") : PduDataType(name),
+            validator_(),
+            data_()
+        {}
+
+        ~COctetString() {}
+
+        virtual const unsigned char* Data() const
+        {
+            return data_.Data();
+        }
+
+        virtual value_t Size() const
+        {
+            return data_.Size();
+        }
+
+        void SetValue(const DataBuffer& buf)
+        {
+            data_ = buf;
+        }
+
+    private:
+        DefaultValidation validator_;
+        DataBuffer data_;
+    };
+
+    typedef COctetString<DefaultValidation> OctetString;
 }
 
 #endif // COCTETSTRING_H

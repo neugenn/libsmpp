@@ -2,6 +2,8 @@
 #define BINDRECEIVER_H
 
 #include "Pdu.h"
+#include "TypeOfNumber.h"
+#include "NumericPlanIndicator.h"
 #include <string>
 
 namespace SMPP
@@ -29,8 +31,8 @@ namespace SMPP
         void SetSystemType(const std::string& system_type);
 
         uint32_t InterfaceVersion() const;
-        uint8_t AddrTon() const;
-        uint8_t AddrNpi() const;
+        TON_VALUE AddrTon() const;
+        NPI AddrNpi() const;
         const char* AddressRange() const;
 
     private:
